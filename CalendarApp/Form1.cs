@@ -1,20 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CalendarApp
 {
-    public partial class Form1 : Form
+    public class Form1 : Form
     {
+        private Button myButton;
+
         public Form1()
         {
-            InitializeComponent();
+            this.Text = "Meine Windows Forms App";
+
+            myButton = new Button();
+            myButton.Text = "Klick mich!";
+            myButton.Click += MyButton_Click;
+
+            this.Controls.Add(myButton);
+        }
+
+        private void MyButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Button wurde geklickt!");
         }
     }
 }
