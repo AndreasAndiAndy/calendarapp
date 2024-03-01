@@ -14,17 +14,30 @@ namespace CalendarApp
             Text = "Kalender App";
             Size = new System.Drawing.Size(500, 500);
 
-            // Panels erstellen und hinzufügen
-            for (int i = 0; i < 3; i++)
-            {
-                Panel panel = new Panel();
-                panel.BackColor = Color.Blue;
-                panel.Size = new Size(50, 50);
-                panel.Location = new Point(10 + i * 160, 10);
-                Controls.Add(panel);
+            int Day = 1;
+
+            for (int j = 0; j < 4; j++) { 
+
+              // Tageslabelss erstellen und hinzufügen
+              for (int i = 0; i < 7; i++)
+              {
+                 Label label = new Label();
+                 label.BackColor = Color.Blue;
+                 label.Size = new Size(50, 20);
+                 label.Location = new Point(10 + i * 60, 70 + j * 75);
+                 label.Text = Day.ToString();
+                 Day++;
+                 Controls.Add(label);
+              }
+            
             }
 
+            //Hier werde ich kucken, wie viele Tage der Monat hat.
+            //Wenn ein Termin hinzugefügt wird, dann soll eine Logik wie bei Android erscheinen.
+            //Eingepflegte Daten sollen (max. 5 untereinander) wie bei Android unter den Zahlen stehen.
+
             calendar = new MonthCalendar();
+            calendar.Visible = false;
             calendar.Location = new System.Drawing.Point(10, 180);
             calendar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             calendar.ForeColor = System.Drawing.Color.Purple;
@@ -33,7 +46,7 @@ namespace CalendarApp
 
             updateButton = new Button();
             updateButton.Text = "neu";
-            updateButton.Location = new System.Drawing.Point(10, 380);
+            updateButton.Location = new System.Drawing.Point(10, 400);
             updateButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             updateButton.Click += UpdateCalendar;
             Controls.Add(updateButton);
