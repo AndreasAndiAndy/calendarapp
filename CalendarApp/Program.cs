@@ -18,39 +18,13 @@ namespace CalendarApp
 
             DateTime now = DateTime.Now;
             int daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
-   
+
             Text = "Kalender App";
             Size = new System.Drawing.Size(500, 500);
 
-            int Day = 1; int maxNumberOfDays = 0;  
+            displayDays(daysInMonth);
 
-            for (int j = 0; j < 5; j++) { 
-
-              // Tageslabels erstellen und hinzufügen
-              for (int i = 0; i < 7; i++)
-              {
-
-                if (maxNumberOfDays < daysInMonth) { 
-                 Label label = new Label();
-                 label.BackColor = Color.Blue;
-                 label.Size = new Size(50, 20);
-                 label.Location = new Point(10 + i * 60, 70 + j * 75);
-                 label.Text = Day.ToString();
-                 Day++;
-                 Controls.Add(label);
-
-                 maxNumberOfDays++;
-
-                    }
-                }
-            
-            }
-
-           
-
-            //Hier werde ich kucken, wie viele Tage der Monat hat.
-            //Wenn ein Termin hinzugefügt wird, dann soll eine Logik wie bei Android erscheinen.
-            //Eingepflegte Daten sollen (max. 5 untereinander) wie bei Android unter den Zahlen stehen.
+            displayDates();
 
             calendar = new MonthCalendar();
             calendar.Visible = false;
@@ -68,13 +42,96 @@ namespace CalendarApp
             Controls.Add(updateButton);
         }
 
+        private void displayDates()
+        {
+            //Represent data as beams (stack max. 2).
+            Dictionary<string, List<CalendarDate>> beams = new Dictionary<string, List<CalendarDate>>();
+            AddValue(beams, "2024-03-15T20:55:59", new CalendarDate()); //Console.WriteLine(now.ToString("s")); 2024-03-15T20:55:59
+            AddValue(beams, "2024-03-15T20:55:59", new CalendarDate()); //TODO: Read this from db with below code.
+            AddValue(beams, "2024-03-16T20:55:59", new CalendarDate());
+
+            HashSet<string> dateList = new HashSet<string>();
+            dateList.Add("2024-03-15T20:55:59");
+            dateList.Add("2024-03-16T20:55:59");
+
+            string connectionString = "Data Source=calendar.db;Version=3;";
+            using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+            {
+                connection.Open();
+
+                // Below code is here.
+
+                connection.Close();
+            }
+
+            foreach (string date in dateList)
+            {
+                // Check if the key exists
+                if (beams.ContainsKey(date))
+                {
+                    // Print all values associated with the key
+                    Console.WriteLine($"Values for Key {date}:");
+                    foreach (var value in beams[date])
+                    {
+                        Console.WriteLine(value); //TODO: Hier werden die Balken entstehen.  
+                        Label label = new Label();
+                        label.BackColor = Color.Blue;
+                        label.Size = new Size(50, 10);
+                        label.Location = new Point(70, 170);
+                        Controls.Add(label);
+                    }
+                }
+            }
+        }
+
+
+
+        private void AddValue(Dictionary<string, List<CalendarDate>> dictionary, string key, CalendarDate value)
+        {
+            // Check if the key already exists
+            if (!dictionary.ContainsKey(key))
+            {
+                // If the key doesn't exist, create a new list for values
+                dictionary[key] = new List<CalendarDate>();
+            }
+
+            // Add the value to the list associated with the key
+            dictionary[key].Add(value);
+        }
+
+        private void displayDays(int daysInMonth)
+        {
+            int Day = 1; int maxNumberOfDays = 0;
+
+            for (int j = 0; j < 5; j++)
+            {
+
+                // Tageslabels erstellen und hinzufügen
+                for (int i = 0; i < 7; i++)
+                {
+
+                    if (maxNumberOfDays < daysInMonth)
+                    {
+                        Label label = new Label();
+                        label.BackColor = Color.Blue;
+                        label.Size = new Size(50, 20);
+                        label.Location = new Point(10 + i * 60, 70 + j * 75);
+                        label.Text = Day.ToString();
+                        Day++;
+                        Controls.Add(label);
+
+                        maxNumberOfDays++;
+
+                    }
+                }
+
+            }
+        }
+
         private void UpdateCalendar(object sender, EventArgs e)
         {
-            // Neue Instanz der AppointmentForm erstellen
             AppointmentForm appointmentForm = new AppointmentForm();
 
-            // Wenn ShowDialog() aufgerufen wird, wird die Hauptform blockiert, bis die AppointmentForm geschlossen wird.
-            // Dadurch wird sie als Popup geöffnet.
             appointmentForm.ShowDialog();
              
         }
@@ -82,31 +139,16 @@ namespace CalendarApp
         public class AppointmentForm : Form
         {
 
+            
+
             public AppointmentForm()
             {
-                DateTime now = DateTime.Now;
-                int daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
-
                 Size = new System.Drawing.Size(450, 550);
                 Button dateSaveButton = new Button();
                 dateSaveButton.Text = "speichern";
                 dateSaveButton.Location = new System.Drawing.Point(10, 420);
                 dateSaveButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
                 Controls.Add(dateSaveButton);
-
-                Dictionary<int, int> beams = new Dictionary<int, int>();
-
-                
-                string connectionString = "Data Source=meinedatenbank.db;Version=3;";
-                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
-                {
-                    connection.Open();
-
-                    // Hier können Sie SQL-Abfragen ausführen
-
-                    connection.Close();
-                }
-                
             }
         }
 
