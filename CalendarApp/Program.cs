@@ -11,16 +11,23 @@ namespace CalendarApp
 
         public CalendarForm()
         {
+
+
+            DateTime now = DateTime.Now;
+            int daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
+   
             Text = "Kalender App";
             Size = new System.Drawing.Size(500, 500);
 
-            int Day = 1;
+            int Day = 1; int maxNumberOfDays = 0;  
 
-            for (int j = 0; j < 4; j++) { 
+            for (int j = 0; j < 5; j++) { 
 
-              // Tageslabelss erstellen und hinzufügen
+              // Tageslabels erstellen und hinzufügen
               for (int i = 0; i < 7; i++)
               {
+
+                if (maxNumberOfDays < daysInMonth) { 
                  Label label = new Label();
                  label.BackColor = Color.Blue;
                  label.Size = new Size(50, 20);
@@ -28,9 +35,15 @@ namespace CalendarApp
                  label.Text = Day.ToString();
                  Day++;
                  Controls.Add(label);
-              }
+
+                 maxNumberOfDays++;
+
+                    }
+                }
             
             }
+
+           
 
             //Hier werde ich kucken, wie viele Tage der Monat hat.
             //Wenn ein Termin hinzugefügt wird, dann soll eine Logik wie bei Android erscheinen.
@@ -54,7 +67,25 @@ namespace CalendarApp
 
         private void UpdateCalendar(object sender, EventArgs e)
         {
-            Console.WriteLine("What the heck am I supposed to do?");
+            // Neue Instanz der AppointmentForm erstellen
+            AppointmentForm appointmentForm = new AppointmentForm();
+
+            // Wenn ShowDialog() aufgerufen wird, wird die Hauptform blockiert, bis die AppointmentForm geschlossen wird.
+            // Dadurch wird sie als Popup geöffnet.
+            appointmentForm.ShowDialog();
+             
+        }
+
+        public partial class AppointmentForm : Form
+        {
+            public AppointmentForm()
+            {
+                //InitializeComponent();
+            }
+
+        
+
+            // Hier können Sie den Code für die Terminanlage oder -bearbeitung hinzufügen
         }
 
         [STAThread]
