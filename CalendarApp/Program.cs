@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.Data.SQLite;
+
 
 namespace CalendarApp
 {
@@ -59,7 +62,7 @@ namespace CalendarApp
 
             updateButton = new Button();
             updateButton.Text = "neu";
-            updateButton.Location = new System.Drawing.Point(10, 400);
+            updateButton.Location = new System.Drawing.Point(10, 420);
             updateButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             updateButton.Click += UpdateCalendar;
             Controls.Add(updateButton);
@@ -76,16 +79,35 @@ namespace CalendarApp
              
         }
 
-        public partial class AppointmentForm : Form
+        public class AppointmentForm : Form
         {
+
             public AppointmentForm()
             {
-                //InitializeComponent();
+                DateTime now = DateTime.Now;
+                int daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
+
+                Size = new System.Drawing.Size(450, 550);
+                Button dateSaveButton = new Button();
+                dateSaveButton.Text = "speichern";
+                dateSaveButton.Location = new System.Drawing.Point(10, 420);
+                dateSaveButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+                Controls.Add(dateSaveButton);
+
+                Dictionary<int, int> beams = new Dictionary<int, int>();
+
+                
+                string connectionString = "Data Source=meinedatenbank.db;Version=3;";
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // Hier können Sie SQL-Abfragen ausführen
+
+                    connection.Close();
+                }
+                
             }
-
-        
-
-            // Hier können Sie den Code für die Terminanlage oder -bearbeitung hinzufügen
         }
 
         [STAThread]
