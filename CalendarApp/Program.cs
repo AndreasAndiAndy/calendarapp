@@ -20,7 +20,7 @@ namespace CalendarApp
             int daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
 
             Text = "Kalender App";
-            Size = new System.Drawing.Size(500, 500);
+            Size = new System.Drawing.Size(900, 500);
 
             displayDays(daysInMonth);
 
@@ -44,60 +44,65 @@ namespace CalendarApp
 
         private void displayDates()
         {
-            //Represent data as beams (stack max. 2).
-            Dictionary<string, List<CalendarDate>> beams = new Dictionary<string, List<CalendarDate>>();
-            AddValue(beams, "2024-03-15T20:55:59", new CalendarDate()); //Console.WriteLine(now.ToString("s")); 2024-03-15T20:55:59
-            AddValue(beams, "2024-03-15T20:55:59", new CalendarDate()); //TODO: Read this from db with below code.
-            AddValue(beams, "2024-03-16T20:55:59", new CalendarDate());
+            
 
-            HashSet<string> dateList = new HashSet<string>();
-            dateList.Add("2024-03-15T20:55:59");
-            dateList.Add("2024-03-16T20:55:59");
-
-            string connectionString = "Data Source=calendar.db;Version=3;";
+            string connectionString = "Data Source=C:\\Users\\user\\source\\repos\\calendarapp\\CalendarApp\\calendar.db;Version=3;";
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
 
-                // Below code is here.
+                int month = DateTime.Now.Month;
+                string monthString = $"{month:D2}";
+                string selectQuery = $"SELECT * FROM calendardates WHERE month = '{monthString}' ORDER BY start;";
+
+
+                try
+                {
+
+                    using (SQLiteCommand command = new SQLiteCommand(selectQuery, connection))
+                    {
+                        using (SQLiteDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                int id = reader.GetInt32(0);
+                                string text = reader.GetString(1);
+                                string start = reader.GetString(2);
+                                string end = reader.GetString(3);
+
+                                Console.WriteLine(start);
+                                //TODO: Hier werden dann die Balken entstehen.
+                                //...und hier werde ich das ganze Zeug auch nach rechts schreiben - aber wie?
+
+
+                                //Console.WriteLine(value);   
+                                //Label label = new Label();
+                                //label.BackColor = Color.Blue;
+                                //label.Size = new Size(50, 10);
+                                //label.Location = new Point(70, 170);
+                                //Controls.Add(label);
+
+
+                            }
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    // Bei einem Fehler wird dieser Block ausgeführt
+                    Console.WriteLine($"Fehler beim Verbinden zur Datenbank: {ex.Message}");
+                }
 
                 connection.Close();
             }
 
-            foreach (string date in dateList)
-            {
-                // Check if the key exists
-                if (beams.ContainsKey(date))
-                {
-                    // Print all values associated with the key
-                    Console.WriteLine($"Values for Key {date}:");
-                    foreach (var value in beams[date])
-                    {
-                        Console.WriteLine(value); //TODO: Hier werden die Balken entstehen.  
-                        Label label = new Label();
-                        label.BackColor = Color.Blue;
-                        label.Size = new Size(50, 10);
-                        label.Location = new Point(70, 170);
-                        Controls.Add(label);
-                    }
-                }
-            }
+         
         }
 
 
 
-        private void AddValue(Dictionary<string, List<CalendarDate>> dictionary, string key, CalendarDate value)
-        {
-            // Check if the key already exists
-            if (!dictionary.ContainsKey(key))
-            {
-                // If the key doesn't exist, create a new list for values
-                dictionary[key] = new List<CalendarDate>();
-            }
-
-            // Add the value to the list associated with the key
-            dictionary[key].Add(value);
-        }
+       
 
         private void displayDays(int daysInMonth)
         {
