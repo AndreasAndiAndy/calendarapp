@@ -3,6 +3,10 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.IO;
+using System.Globalization;
+using System.Resources;
+
 
 
 namespace CalendarApp
@@ -15,17 +19,20 @@ namespace CalendarApp
         public CalendarForm()
         {
 
-
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+            var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(CalendarForm).Assembly);
+             
             DateTime now = DateTime.Now;
             int daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
 
-            Text = "Kalender App";
+            string currentMonth = now.ToString("MMMM");
+
+            displayDays(daysInMonth, currentMonth); 
+
+            displayDates(DateTime.Now.Month);
+            
             Size = new System.Drawing.Size(900, 500);
-
-            displayDays(daysInMonth);
-
-            displayDates();
-
+            
             calendar = new MonthCalendar();
             calendar.Visible = false;
             calendar.Location = new System.Drawing.Point(10, 180);
@@ -34,27 +41,25 @@ namespace CalendarApp
 
             Controls.Add(calendar);
 
-            updateButton = new Button();
-            updateButton.Text = "neu";
-            updateButton.Location = new System.Drawing.Point(10, 420);
-            updateButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            updateButton.Click += UpdateCalendar;
-            Controls.Add(updateButton);
+            //updateButton = new Button();
+            //updateButton.Text = rm.GetString("new");
+            //updateButton.Location = new System.Drawing.Point(10, 420);
+            //updateButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            //updateButton.Click += UpdateCalendar;
+            //Controls.Add(updateButton);
         }
 
-        private void displayDates()
+        private void displayDates(int month)
         {
+            //string connectionString = "Data Source=C:\\Users\\user\\source\\repos\\calendarapp\\CalendarApp\\calendar.db;Version=3;";
+            string connectionString = "Data Source=" + Directory.GetCurrentDirectory() + "\\calendar.db;Version=3;";
             
-
-            string connectionString = "Data Source=C:\\Users\\user\\source\\repos\\calendarapp\\CalendarApp\\calendar.db;Version=3;";
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
-
-                int month = DateTime.Now.Month;
+                
                 string monthString = $"{month:D2}";
                 string selectQuery = $"SELECT * FROM calendardates WHERE month = '{monthString}' ORDER BY start;";
-
 
                 try
                 {
@@ -69,12 +74,9 @@ namespace CalendarApp
                                 string text = reader.GetString(1);
                                 string start = reader.GetString(2);
                                 string end = reader.GetString(3);
-
-                                Console.WriteLine(start);
+                                
                                 //TODO: Hier werden dann die Balken entstehen.
                                 //...und hier werde ich das ganze Zeug auch nach rechts schreiben - aber wie?
-
-
                                 //Console.WriteLine(value);   
                                 //Label label = new Label();
                                 //label.BackColor = Color.Blue;
@@ -99,13 +101,13 @@ namespace CalendarApp
 
          
         }
+        
 
-
-
-       
-
-        private void displayDays(int daysInMonth)
+        private void displayDays(int daysInMonth, string currentMonth)
         {
+
+            Text = currentMonth;
+
             int Day = 1; int maxNumberOfDays = 0;
 
             for (int j = 0; j < 5; j++)
@@ -118,10 +120,13 @@ namespace CalendarApp
                     if (maxNumberOfDays < daysInMonth)
                     {
                         Label label = new Label();
-                        label.BackColor = Color.Blue;
+                        label.BackColor = Color.LightGreen;
                         label.Size = new Size(50, 20);
                         label.Location = new Point(10 + i * 60, 70 + j * 75);
                         label.Text = Day.ToString();
+
+                        label.Click += UpdateCalendar;
+
                         Day++;
                         Controls.Add(label);
 
@@ -135,26 +140,46 @@ namespace CalendarApp
 
         private void UpdateCalendar(object sender, EventArgs e)
         {
-            AppointmentForm appointmentForm = new AppointmentForm();
 
+            Console.WriteLine(sender + "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+            AppointmentForm appointmentForm = new AppointmentForm(this);
             appointmentForm.ShowDialog();
              
         }
 
         public class AppointmentForm : Form
         {
-
+            private CalendarForm calendarFormInstance;
             
 
-            public AppointmentForm()
+            public AppointmentForm(CalendarForm calendarForm)
             {
+
+                this.calendarFormInstance = calendarForm;
+
+                CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+                var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
+
                 Size = new System.Drawing.Size(450, 550);
                 Button dateSaveButton = new Button();
-                dateSaveButton.Text = "speichern";
+                dateSaveButton.Text = rm.GetString("save");
                 dateSaveButton.Location = new System.Drawing.Point(10, 420);
                 dateSaveButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+                dateSaveButton.Click += UpdateDate;
                 Controls.Add(dateSaveButton);
+                
             }
+
+            private void UpdateDate(object sender, EventArgs e)
+            {
+                //TODO: Dieses Ding soll den ausgewählten Monat, dessen AZ der Tage und
+                //und v. a. den ausgewählten Tag abgreifen können.
+                //calendarFormInstance.displayDays(daysInMonth, currentMonth);
+
+                calendarFormInstance.displayDates(DateTime.Now.Month);
+            }
+
         }
 
         [STAThread]
