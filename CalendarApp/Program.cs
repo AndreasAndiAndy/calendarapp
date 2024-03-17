@@ -14,7 +14,6 @@ namespace CalendarApp
     public class CalendarForm : Form
     {
         private MonthCalendar calendar;
-        private Button updateButton;
 
         public CalendarForm()
         {
@@ -25,7 +24,7 @@ namespace CalendarApp
             DateTime now = DateTime.Now;
             int daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
 
-            string currentMonth = now.ToString("MMMM");
+            string currentMonth = now.ToString("MM"); 
 
             displayDays(daysInMonth, currentMonth); 
 
@@ -38,20 +37,12 @@ namespace CalendarApp
             calendar.Location = new System.Drawing.Point(10, 180);
             calendar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             calendar.ForeColor = System.Drawing.Color.Purple;
-
             Controls.Add(calendar);
 
-            //updateButton = new Button();
-            //updateButton.Text = rm.GetString("new");
-            //updateButton.Location = new System.Drawing.Point(10, 420);
-            //updateButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            //updateButton.Click += UpdateCalendar;
-            //Controls.Add(updateButton);
         }
 
         private void displayDates(int month)
         {
-            //string connectionString = "Data Source=C:\\Users\\user\\source\\repos\\calendarapp\\CalendarApp\\calendar.db;Version=3;";
             string connectionString = "Data Source=" + Directory.GetCurrentDirectory() + "\\calendar.db;Version=3;";
             
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
@@ -92,7 +83,6 @@ namespace CalendarApp
                 }
                 catch (Exception ex)
                 {
-                    // Bei einem Fehler wird dieser Block ausgeführt
                     Console.WriteLine($"Fehler beim Verbinden zur Datenbank: {ex.Message}");
                 }
 
@@ -105,8 +95,9 @@ namespace CalendarApp
 
         private void displayDays(int daysInMonth, string currentMonth)
         {
+            
 
-            Text = currentMonth;
+            Text = currentMonthIntToI18N(currentMonth);
 
             int Day = 1; int maxNumberOfDays = 0;
 
@@ -138,28 +129,99 @@ namespace CalendarApp
             }
         }
 
+       
+
         private void UpdateCalendar(object sender, EventArgs e)
         {
+            string senderText = "1";
 
-            Console.WriteLine(sender + "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-
-            AppointmentForm appointmentForm = new AppointmentForm(this);
+            if (sender is Label label) {
+                senderText = label.Text;
+                //Console.WriteLine("senderText is " + senderText);
+            }
+            
+            AppointmentForm appointmentForm = new AppointmentForm(this, senderText, Text);
             appointmentForm.ShowDialog();
              
+        }
+
+        private string currentMonthIntToI18N(string currentMonth)
+        {
+            string[] months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+            var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
+            return rm.GetString(months[int.Parse(currentMonth) - 1]);
         }
 
         public class AppointmentForm : Form
         {
             private CalendarForm calendarFormInstance;
-            
+            private TextBox editableTextBox;
+            private DateTimePicker datePicker;
+            private DateTimePicker startTimePicker;
+            private DateTimePicker endTimePicker;
 
-            public AppointmentForm(CalendarForm calendarForm)
+
+            //2 - März
+            public AppointmentForm(CalendarForm calendarForm, string dateClickedText, string currentMonth)
             {
-
                 this.calendarFormInstance = calendarForm;
 
                 CultureInfo.CurrentCulture = new CultureInfo("de-DE");
                 var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
+
+                int currentYear = DateTime.Now.Year;
+
+                string[] yearMonthDay = { currentYear.ToString(), currentMonth, dateClickedText };
+                
+
+                Text = yearMonthDay[0] + " " + yearMonthDay[1] + " " + yearMonthDay[2];
+
+                //Text festlegen.
+                editableTextBox = new TextBox
+                {
+                    AcceptsReturn = true,
+                    AcceptsTab = true,
+                    Dock = System.Windows.Forms.DockStyle.Fill,
+                    Multiline = true,
+                    ScrollBars = System.Windows.Forms.ScrollBars.Vertical
+                };
+
+                // Hier die Höhe anpassen, z.B. dreimal so hoch wie zuvor
+                editableTextBox.Height = 3 * editableTextBox.Font.Height;
+
+
+                // Datum auswählen
+                datePicker = new DateTimePicker();
+                datePicker.Format = DateTimePickerFormat.Short;
+                datePicker.Location = new Point(10, 150);
+               
+
+                // Startzeit auswählen TODO: Stattdessen dropdown.
+                startTimePicker = new DateTimePicker();
+                startTimePicker.Format = DateTimePickerFormat.Time;
+                startTimePicker.Location = new Point(10, 180);
+
+                // Endzeit auswählen TODO: Stattdessen dropdown.
+                endTimePicker = new DateTimePicker();
+                endTimePicker.Format = DateTimePickerFormat.Time;
+                endTimePicker.Location = new Point(10, 210);
+                
+                Controls.Add(datePicker);
+                Controls.Add(startTimePicker);
+                Controls.Add(endTimePicker);
+                
+
+                Panel textboxBoxPanel = new Panel
+                {
+                    Location = new System.Drawing.Point(10, 10),
+                    Size = new System.Drawing.Size(400, 70), 
+                };
+                textboxBoxPanel.Controls.Add(editableTextBox);
+        
+                Controls.Add(textboxBoxPanel);
+                
 
                 Size = new System.Drawing.Size(450, 550);
                 Button dateSaveButton = new Button();
@@ -167,17 +229,21 @@ namespace CalendarApp
                 dateSaveButton.Location = new System.Drawing.Point(10, 420);
                 dateSaveButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
                 dateSaveButton.Click += UpdateDate;
+
+
                 Controls.Add(dateSaveButton);
                 
             }
 
             private void UpdateDate(object sender, EventArgs e)
-            {
-                //TODO: Dieses Ding soll den ausgewählten Monat, dessen AZ der Tage und
-                //und v. a. den ausgewählten Tag abgreifen können.
-                //calendarFormInstance.displayDays(daysInMonth, currentMonth);
+            { 
 
-                calendarFormInstance.displayDates(DateTime.Now.Month);
+                // Lese den eingegebenen Text aus dem Textfeld
+                string enteredText = editableTextBox.Text;
+
+                calendarFormInstance.displayDays(31, "03");
+                //calendarFormInstance.displayDates(DateTime.Now.Month);
+                
             }
 
         }
