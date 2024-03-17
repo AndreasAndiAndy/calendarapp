@@ -1,37 +1,32 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 using System.Globalization;
 using System.Resources;
-
-
+using System.Collections.Generic;
 
 namespace CalendarApp
 {
     public class CalendarForm : Form
     {
         private MonthCalendar calendar;
+        private DateTime now = DateTime.Now;
 
         public CalendarForm()
         {
 
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
             var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(CalendarForm).Assembly);
-             
-            DateTime now = DateTime.Now;
+
             int daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
+            string currentMonthNumber = now.ToString("MM");
 
-            string currentMonth = now.ToString("MM"); 
+            displayDaysAndMonth(daysInMonth, currentMonthNumber);
 
-            displayDays(daysInMonth, currentMonth); 
-
-            displayDates(DateTime.Now.Month);
-            
             Size = new System.Drawing.Size(900, 500);
-            
+
             calendar = new MonthCalendar();
             calendar.Visible = false;
             calendar.Location = new System.Drawing.Point(10, 180);
@@ -41,8 +36,15 @@ namespace CalendarApp
 
         }
 
-        private void displayDates(int month)
+      
+
+        private void displayDates(string monthNumber)
         {
+            int month = Int32.Parse(monthNumber);
+
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+            var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
+
             string connectionString = "Data Source=" + Directory.GetCurrentDirectory() + "\\calendar.db;Version=3;";
             
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
@@ -91,13 +93,15 @@ namespace CalendarApp
 
          
         }
-        
 
+        
         private void displayDays(int daysInMonth, string currentMonth)
         {
-            
 
-            Text = currentMonthIntToI18N(currentMonth);
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+            var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
+            
+            Text = rm.GetString(numberToMonth(currentMonth));
 
             int Day = 1; int maxNumberOfDays = 0;
 
@@ -129,7 +133,8 @@ namespace CalendarApp
             }
         }
 
-       
+   
+
 
         private void UpdateCalendar(object sender, EventArgs e)
         {
@@ -137,7 +142,6 @@ namespace CalendarApp
 
             if (sender is Label label) {
                 senderText = label.Text;
-                //Console.WriteLine("senderText is " + senderText);
             }
             
             AppointmentForm appointmentForm = new AppointmentForm(this, senderText, Text);
@@ -145,13 +149,17 @@ namespace CalendarApp
              
         }
 
-        private string currentMonthIntToI18N(string currentMonth)
+        private void displayDaysAndMonth(int daysInMonth, string currentMonthNumber)
+        {
+            displayDays(daysInMonth, currentMonthNumber);
+            displayDates(currentMonthNumber);
+        }
+
+        private string numberToMonth(string currentMonth)
         {
             string[] months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
-            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
-            var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
-            return rm.GetString(months[int.Parse(currentMonth) - 1]);
+            return months[int.Parse(currentMonth) - 1];
         }
 
         public class AppointmentForm : Form
@@ -166,16 +174,14 @@ namespace CalendarApp
             //2 - März
             public AppointmentForm(CalendarForm calendarForm, string dateClickedText, string currentMonth)
             {
-                this.calendarFormInstance = calendarForm;
-
                 CultureInfo.CurrentCulture = new CultureInfo("de-DE");
                 var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
 
+                this.calendarFormInstance = calendarForm;
                 int currentYear = DateTime.Now.Year;
 
                 string[] yearMonthDay = { currentYear.ToString(), currentMonth, dateClickedText };
                 
-
                 Text = yearMonthDay[0] + " " + yearMonthDay[1] + " " + yearMonthDay[2];
 
                 //Text festlegen.
@@ -241,10 +247,36 @@ namespace CalendarApp
                 // Lese den eingegebenen Text aus dem Textfeld
                 string enteredText = editableTextBox.Text;
 
-                calendarFormInstance.displayDays(31, "03");
-                //calendarFormInstance.displayDates(DateTime.Now.Month);
+                //TODO: Das Jahr muss ich mir irgendwo holen.
+                calendarFormInstance.displayDays(numberOfDaysInFollowingMonth("05", "2024"), "05");
+                calendarFormInstance.displayDates("05");
                 
             }
+
+
+            int numberOfDaysInFollowingMonth(string monthNumber, string year) {
+
+                bool isLeapYear = DateTime.IsLeapYear(Int32.Parse(year));
+
+                int? feb = isLeapYear ? 29 : 28;
+
+                IDictionary<int, int> monthsAntTheNumberOfTheirDays = new Dictionary<int, int>();
+                monthsAntTheNumberOfTheirDays.Add(1, 31);
+                monthsAntTheNumberOfTheirDays.Add(2, feb);
+                monthsAntTheNumberOfTheirDays.Add(3, 31);
+                monthsAntTheNumberOfTheirDays.Add(4, 30);
+                monthsAntTheNumberOfTheirDays.Add(5, 31);
+                monthsAntTheNumberOfTheirDays.Add(6, 30);
+                monthsAntTheNumberOfTheirDays.Add(7, 31);
+                monthsAntTheNumberOfTheirDays.Add(8, 31);
+                monthsAntTheNumberOfTheirDays.Add(9, 30);
+                monthsAntTheNumberOfTheirDays.Add(10, 31);
+                monthsAntTheNumberOfTheirDays.Add(11, 30);
+                monthsAntTheNumberOfTheirDays.Add(12, 31);
+
+                return monthsAntTheNumberOfTheirDays[Int32.Parse(monthNumber)];
+            }
+
 
         }
 
