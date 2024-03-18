@@ -167,9 +167,8 @@ namespace CalendarApp
             private CalendarForm calendarFormInstance;
             private TextBox editableTextBox;
             private DateTimePicker datePicker;
-            private DateTimePicker startTimePicker;
-            private DateTimePicker endTimePicker;
-
+            private ComboBox comboBoxStartHours; ComboBox comboBoxStartMinutes;
+            private ComboBox comboBoxEndHours; ComboBox comboBoxEndMinutes;
 
             //2 - März
             public AppointmentForm(CalendarForm calendarForm, string dateClickedText, string currentMonth)
@@ -181,7 +180,7 @@ namespace CalendarApp
                 int currentYear = DateTime.Now.Year;
 
                 string[] yearMonthDay = { currentYear.ToString(), currentMonth, dateClickedText };
-                
+
                 Text = yearMonthDay[0] + " " + yearMonthDay[1] + " " + yearMonthDay[2];
 
                 //Text festlegen.
@@ -202,32 +201,56 @@ namespace CalendarApp
                 datePicker = new DateTimePicker();
                 datePicker.Format = DateTimePickerFormat.Short;
                 datePicker.Location = new Point(10, 150);
-               
 
-                // Startzeit auswählen TODO: Stattdessen dropdown.
-                startTimePicker = new DateTimePicker();
-                startTimePicker.Format = DateTimePickerFormat.Time;
-                startTimePicker.Location = new Point(10, 180);
+                var date = DateTime.Now;
+                int startHourIndex = date.Hour + 1;
+                int endHourIndex = date.Hour + 2;
 
-                // Endzeit auswählen TODO: Stattdessen dropdown.
-                endTimePicker = new DateTimePicker();
-                endTimePicker.Format = DateTimePickerFormat.Time;
-                endTimePicker.Location = new Point(10, 210);
-                
+                // Startzeit auswählen
+                comboBoxStartHours = new ComboBox();
+                comboBoxEndHours = new ComboBox();
+                setHours();
+                comboBoxStartHours.SelectedIndex = startHourIndex;
+                comboBoxStartHours.Location = new Point(10, 200);
+
+                comboBoxStartMinutes = new ComboBox();
+                comboBoxEndMinutes = new ComboBox();
+                setMinutes();
+                comboBoxStartMinutes.SelectedIndex = 0;
+                comboBoxStartMinutes.Location = new Point(150, 200);
+
+
+                // Endzeit auswählen
+                setHours();
+                comboBoxEndHours.SelectedIndex = endHourIndex;
+                comboBoxEndHours.Location = new Point(10, 300);
+
+                setMinutes();
+                comboBoxEndMinutes.SelectedIndex = 0;
+                comboBoxEndMinutes.Location = new Point(150, 300);
+
+
+                // Endzeit auswählen.
+                //endTimePicker = new DateTimePicker();
+                //endTimePicker.Format = DateTimePickerFormat.Time;
+                //endTimePicker.Location = new Point(10, 210);
+
                 Controls.Add(datePicker);
-                Controls.Add(startTimePicker);
-                Controls.Add(endTimePicker);
-                
+                Controls.Add(comboBoxStartHours);
+                Controls.Add(comboBoxStartMinutes);
+                Controls.Add(comboBoxEndHours);
+                Controls.Add(comboBoxEndMinutes);
+
 
                 Panel textboxBoxPanel = new Panel
                 {
                     Location = new System.Drawing.Point(10, 10),
-                    Size = new System.Drawing.Size(400, 70), 
+                    Size = new System.Drawing.Size(400, 70),
                 };
                 textboxBoxPanel.Controls.Add(editableTextBox);
-        
+
                 Controls.Add(textboxBoxPanel);
-                
+
 
                 Size = new System.Drawing.Size(450, 550);
                 Button dateSaveButton = new Button();
@@ -238,8 +261,10 @@ namespace CalendarApp
 
 
                 Controls.Add(dateSaveButton);
-                
+
             }
+
+
 
             private void UpdateDate(object sender, EventArgs e)
             { 
@@ -253,12 +278,31 @@ namespace CalendarApp
                 
             }
 
+            private void setHours()
+            {
+                for (int i = 0; i < 24; i++)
+                {
+                    string hour = i.ToString("00"); // Fügt eine führende Null hinzu, falls nötig
+                    comboBoxStartHours.Items.Add(hour);
+                    comboBoxEndHours.Items.Add(hour);
+                }
+            }
+
+                private void setMinutes()
+            {
+                for (int i = -0; i < 61; i+=5)
+                {
+                    string hour = i.ToString("00"); // Fügt eine führende Null hinzu, falls nötig
+                    comboBoxStartMinutes.Items.Add(hour);
+                    comboBoxEndMinutes.Items.Add(hour);
+                }
+            }
 
             int numberOfDaysInFollowingMonth(string monthNumber, string year) {
 
                 bool isLeapYear = DateTime.IsLeapYear(Int32.Parse(year));
 
-                int? feb = isLeapYear ? 29 : 28;
+                int feb = isLeapYear ? 29 : 28;
 
                 IDictionary<int, int> monthsAntTheNumberOfTheirDays = new Dictionary<int, int>();
                 monthsAntTheNumberOfTheirDays.Add(1, 31);
