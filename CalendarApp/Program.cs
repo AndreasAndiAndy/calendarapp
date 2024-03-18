@@ -98,6 +98,24 @@ namespace CalendarApp
         private void displayDays(int daysInMonth, string currentMonth)
         {
 
+            // Zuerst alle vorherigen Labels entfernen
+            List<Label> labelsToRemove = new List<Label>();
+
+            foreach (Control control in Controls)
+            {
+                if (control is Label)
+                {
+                    labelsToRemove.Add((Label)control);
+                }
+            }
+
+            foreach (var label in labelsToRemove)
+            {
+                Controls.Remove(label);
+                label.Dispose(); // Ressourcen freigeben
+            }
+
+
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
             var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
             
@@ -170,18 +188,19 @@ namespace CalendarApp
             private ComboBox comboBoxStartHours; ComboBox comboBoxStartMinutes;
             private ComboBox comboBoxEndHours; ComboBox comboBoxEndMinutes;
 
-            //2 - März
+            private ResourceManager rm;
+
             public AppointmentForm(CalendarForm calendarForm, string dateClickedText, string currentMonth)
             {
                 CultureInfo.CurrentCulture = new CultureInfo("de-DE");
-                var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
+                rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
 
                 this.calendarFormInstance = calendarForm;
                 int currentYear = DateTime.Now.Year;
 
                 string[] yearMonthDay = { currentYear.ToString(), currentMonth, dateClickedText };
 
-                Text = yearMonthDay[0] + " " + yearMonthDay[1] + " " + yearMonthDay[2];
+                Text = rm.GetString("Year") + ": " + yearMonthDay[0] + " " + rm.GetString("Month") + ": " + yearMonthDay[1] + " " + rm.GetString("Day") + ": " + yearMonthDay[2];
 
                 //Text festlegen.
                 editableTextBox = new TextBox
@@ -272,9 +291,20 @@ namespace CalendarApp
                 // Lese den eingegebenen Text aus dem Textfeld
                 string enteredText = editableTextBox.Text;
 
-                //TODO: Das Jahr muss ich mir irgendwo holen.
-                calendarFormInstance.displayDays(numberOfDaysInFollowingMonth("05", "2024"), "05");
-                calendarFormInstance.displayDates("05");
+                DateTime pickedDate = datePicker.Value;
+                string completeDate = pickedDate.ToString("yyyy-MM-dd");
+
+                string pickedYear = completeDate.Split('-')[0];
+                string pickedMonth = completeDate.Split('-')[1];
+                string pickedDay = completeDate.Split('-')[2];
+
+                string startHH = comboBoxStartHours.Text;
+                string startMM = comboBoxStartMinutes.Text;
+                string endHH = comboBoxEndHours.Text;
+                string endMM = comboBoxEndMinutes.Text;
+
+                calendarFormInstance.displayDays(numberOfDaysInFollowingMonth(pickedMonth, pickedYear), pickedMonth);
+                calendarFormInstance.displayDates("09");
                 
             }
 
