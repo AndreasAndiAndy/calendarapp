@@ -39,7 +39,7 @@ namespace CalendarApp
 
 
 
-        private void displayDates(string monthNumber)
+        private void displayDates(string monthNumber, string currentYearhNumber)
         {
             int month = Int32.Parse(monthNumber);
 
@@ -54,6 +54,7 @@ namespace CalendarApp
                 
                 string monthString = $"{month:D2}";
                 string selectQuery = $"SELECT * FROM calendardates WHERE month = '{monthString}' ORDER BY start;";
+                //TODO: Where year is currentYearhNumber.
 
                 try
                 {
@@ -68,7 +69,8 @@ namespace CalendarApp
                                 string text = reader.GetString(1);
                                 string start = reader.GetString(2);
                                 string end = reader.GetString(3);
-                                
+                                //...id, text start, end, (month, year) 
+
                                 //TODO: Hier werden dann die Balken entstehen.
                                 //...und hier werde ich das ganze Zeug auch nach rechts schreiben - aber wie?
                                 //Console.WriteLine(value);   
@@ -171,7 +173,7 @@ namespace CalendarApp
         private void displayDaysAndMonth(int daysInMonth, string currentMonthNumber, string currentYearhNumber)
         {
             displayDays(daysInMonth, currentMonthNumber, currentYearhNumber);
-            displayDates(currentMonthNumber);
+            displayDates(currentMonthNumber, currentYearhNumber);
         }
 
         private string numberToMonth(string currentMonth)
@@ -305,7 +307,7 @@ namespace CalendarApp
                 string endMM = comboBoxEndMinutes.Text;
 
                 calendarFormInstance.displayDays(numberOfDaysInFollowingMonth(pickedMonth, pickedYear), pickedMonth, pickedYear);
-                calendarFormInstance.displayDates("09");
+                calendarFormInstance.displayDates(pickedMonth, pickedYear);
                 
             }
 
