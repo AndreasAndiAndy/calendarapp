@@ -11,7 +11,7 @@ namespace CalendarApp
 {
     public class CalendarForm : Form
     {
-        private MonthCalendar calendar;
+        //private MonthCalendar calendar;
         private DateTime now = DateTime.Now;
 
         public CalendarForm()
@@ -22,21 +22,22 @@ namespace CalendarApp
 
             int daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
             string currentMonthNumber = now.ToString("MM");
+            string currentYearhNumber = now.ToString("yyyy");
 
-            displayDaysAndMonth(daysInMonth, currentMonthNumber);
+            displayDaysAndMonth(daysInMonth, currentMonthNumber, currentYearhNumber);
 
             Size = new System.Drawing.Size(900, 500);
 
-            calendar = new MonthCalendar();
-            calendar.Visible = false;
-            calendar.Location = new System.Drawing.Point(10, 180);
-            calendar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            calendar.ForeColor = System.Drawing.Color.Purple;
-            Controls.Add(calendar);
+            //calendar = new MonthCalendar();
+            //calendar.Visible = false;
+            //calendar.Location = new System.Drawing.Point(10, 180);
+            //calendar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            //calendar.ForeColor = System.Drawing.Color.Purple;
+            //Controls.Add(calendar);
 
         }
 
-      
+
 
         private void displayDates(string monthNumber)
         {
@@ -45,7 +46,7 @@ namespace CalendarApp
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
             var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
 
-            string connectionString = "Data Source=" + Directory.GetCurrentDirectory() + "\\calendar.db;Version=3;";
+            string connectionString = "Data Source=" + Directory.GetCurrentDirectory() + "\\calendar.db;Version=3;"; Console.WriteLine("000000000000000000000000000000000000000000"); Console.WriteLine(connectionString);
             
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
@@ -95,7 +96,7 @@ namespace CalendarApp
         }
 
         
-        private void displayDays(int daysInMonth, string currentMonth)
+        private void displayDays(int daysInMonth, string currentMonth, string currentYearhNumber)
         {
 
             // Zuerst alle vorherigen Labels entfernen
@@ -118,8 +119,8 @@ namespace CalendarApp
 
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
             var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
-            
-            Text = rm.GetString(numberToMonth(currentMonth));
+
+            Text = rm.GetString(numberToMonth(currentMonth)) + "  " + currentYearhNumber;
 
             int Day = 1; int maxNumberOfDays = 0;
 
@@ -167,9 +168,9 @@ namespace CalendarApp
              
         }
 
-        private void displayDaysAndMonth(int daysInMonth, string currentMonthNumber)
+        private void displayDaysAndMonth(int daysInMonth, string currentMonthNumber, string currentYearhNumber)
         {
-            displayDays(daysInMonth, currentMonthNumber);
+            displayDays(daysInMonth, currentMonthNumber, currentYearhNumber);
             displayDates(currentMonthNumber);
         }
 
@@ -303,7 +304,7 @@ namespace CalendarApp
                 string endHH = comboBoxEndHours.Text;
                 string endMM = comboBoxEndMinutes.Text;
 
-                calendarFormInstance.displayDays(numberOfDaysInFollowingMonth(pickedMonth, pickedYear), pickedMonth);
+                calendarFormInstance.displayDays(numberOfDaysInFollowingMonth(pickedMonth, pickedYear), pickedMonth, pickedYear);
                 calendarFormInstance.displayDates("09");
                 
             }
