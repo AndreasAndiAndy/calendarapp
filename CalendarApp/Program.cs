@@ -12,7 +12,7 @@ namespace CalendarApp
 {
     public class CalendarForm : Form
     {
-        //private MonthCalendar calendar;
+
         private DateTime now = DateTime.Now;
 
         public CalendarForm()
@@ -29,12 +29,7 @@ namespace CalendarApp
 
             Size = new System.Drawing.Size(900, 500);
 
-            //calendar = new MonthCalendar();
-            //calendar.Visible = false;
-            //calendar.Location = new System.Drawing.Point(10, 180);
-            //calendar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            //calendar.ForeColor = System.Drawing.Color.Purple;
-            //Controls.Add(calendar);
+   
 
         }
 
@@ -42,6 +37,7 @@ namespace CalendarApp
 
         private void displayDates(string monthNumber, string currentYearhNumber)
         {
+
             int month = Int32.Parse(monthNumber);
 
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
@@ -76,9 +72,9 @@ namespace CalendarApp
                                 Label label = new Label();
                                 label.BackColor = Color.Blue;
 
-                                label.Size = new Size(50, 10); //TODO: Das Ende über Size regeln.
+                                label.Size = new Size(50, 10);
 
-                                label.Location = new Point(findXFor(start), findYFor(start));
+                                label.Location = new Point(findXFor(start, end), findYFor(start, end));
 
                                 Controls.Add(label);
 
@@ -99,10 +95,8 @@ namespace CalendarApp
          
         }
 
-        private int findYFor(string start)
-        { //TODO: In einer globalen Variable speichern, ob der Punkt schon da ist, wenn das neu 
-          //aufgebaut wird, diese Datenstruktur wieder löschen.
-
+        private static int findYFor(string start, string end)
+        {
             string[] arrayRowOne = { "1", "2", "3", "4", "5", "6", "7" };
             string[] arrayRowTwo = { "8", "9", "10", "11", "12", "13", "14" };
             string[] arrayRowThree = { "15", "16", "17", "18", "19", "20", "21" };
@@ -111,31 +105,26 @@ namespace CalendarApp
 
             int pos = 90;
 
-            string[] dateAndTime = start.Split('T'); 
+            DateTime startDate = DateTime.Parse(start);
+            DateTime endDate = DateTime.Parse(end);
 
-            if (dateAndTime.Length > 1)
+            // Iteriere über alle Tage zwischen start und end
+            for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
             {
-                string date = dateAndTime[0];
-                string[] yearMonthDay = date.Split('-');
-                if (yearMonthDay.Length > 2)
-                {
+                string day = date.Day.ToString();
 
-                    string day = yearMonthDay[2];
-
-                    if (arrayRowOne.Contains(day)) { pos = 90; }
-                    if (arrayRowTwo.Contains(day)) { pos = 165; } 
-                    if (arrayRowThree.Contains(day)) { pos = 240; }
-                    if (arrayRowFour.Contains(day)) { pos = 315; }
-                    if (arrayRowFive.Contains(day)) { pos = 390; }
-                }
+                // Überprüfe für jeden Tag, welcher Reihe er angehört
+                if (arrayRowOne.Contains(day)) { pos = 90; }
+                if (arrayRowTwo.Contains(day)) { pos = 165; }
+                if (arrayRowThree.Contains(day)) { pos = 240; }
+                if (arrayRowFour.Contains(day)) { pos = 315; }
+                if (arrayRowFive.Contains(day)) { pos = 390; }
             }
 
             return pos;
         }
-
-        private int findXFor(string start)
+        private static int findXFor(string start, string end)
         {
-
             string[] arrayRowOne = { "1", "8", "15", "22", "29" };
             string[] arrayRowTwo = { "2", "9", "16", "23", "30" };
             string[] arrayRowThree = { "3", "10", "17", "24", "31" };
@@ -146,27 +135,23 @@ namespace CalendarApp
 
             int pos = 10;
 
-            string[] dateAndTime = start.Split('T');
+            DateTime startDate = DateTime.Parse(start);
+            DateTime endDate = DateTime.Parse(end);
 
-            if (dateAndTime.Length > 1) {
-                string date = dateAndTime[0];
-                string[] yearMonthDay = date.Split('-');
-                if (yearMonthDay.Length > 2) {
+            // Iteriere über alle Tage zwischen start und end
+            for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
+            {
+                string day = date.Day.ToString();
 
-                    string day = yearMonthDay[2]; //Console.WriteLine(day + " ::::::::::::::::::::::::::::");
-
-                    if (arrayRowOne.Contains(day)) { pos = 10; }
-                    if (arrayRowTwo.Contains(day)) { pos = 70; }
-                    if (arrayRowThree.Contains(day)) { pos = 130; }
-                    if (arrayRowFour.Contains(day)) { pos = 190; }
-                    if (arrayRowFive.Contains(day)) { pos = 250; }
-                    if (arrayRowSix.Contains(day)) { pos = 310; }
-                    if (arrayRowSeven.Contains(day)) { pos = 370; }
-
-                }
+                // Überprüfe für jeden Tag, zu welcher Reihe er angehört
+                if (arrayRowOne.Contains(day)) { pos = 10; }
+                if (arrayRowTwo.Contains(day)) { pos = 70; }
+                if (arrayRowThree.Contains(day)) { pos = 130; }
+                if (arrayRowFour.Contains(day)) { pos = 190; }
+                if (arrayRowFive.Contains(day)) { pos = 250; }
+                if (arrayRowSix.Contains(day)) { pos = 310; }
+                if (arrayRowSeven.Contains(day)) { pos = 370; }
             }
-
-
 
             return pos;
         }
@@ -199,6 +184,12 @@ namespace CalendarApp
 
             int Day = 1; int maxNumberOfDays = 0;
 
+            Label plus = new Label();
+            plus.Size = new Size(50, 50);
+            plus.Location = new Point(10, 20);
+            plus.Text = "+";
+            plus.Click += UpdateCalendar;
+
             for (int j = 0; j < 5; j++)
             {
 
@@ -213,10 +204,8 @@ namespace CalendarApp
                         label.Size = new Size(50, 20);
                         label.Location = new Point(10 + i * 60, 70 + j * 75);
                         label.Text = Day.ToString();
-
-                        label.Click += UpdateCalendar; //TODO: Hier eher eine Methode zum anzeigen aller Termine rechts. UpdateCalendar soll ausgelöst werden, wenn 
-                        //in Abhängigkeit zu dem ausgewähltn Tag ein Plus gedrückt wird.
-
+                        //label.Click += UpdateCalendar; 
+                         
                         Day++;
                         Controls.Add(label);
 
@@ -224,8 +213,9 @@ namespace CalendarApp
 
                     }
                 }
-
+                 
             }
+            Controls.Add(plus);
         }
 
    
@@ -348,8 +338,7 @@ namespace CalendarApp
                 textboxBoxPanel.Controls.Add(editableTextBox);
 
                 Controls.Add(textboxBoxPanel);
-
-
+                
                 Size = new System.Drawing.Size(450, 550);
                 Button dateSaveButton = new Button();
                 dateSaveButton.Text = rm.GetString("save");
