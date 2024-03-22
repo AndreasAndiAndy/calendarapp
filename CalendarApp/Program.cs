@@ -6,6 +6,7 @@ using System.IO;
 using System.Globalization;
 using System.Resources;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CalendarApp
 {
@@ -46,15 +47,16 @@ namespace CalendarApp
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
             var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
 
-            string connectionString = "Data Source=" + Directory.GetCurrentDirectory() + "\\calendar.db;Version=3;"; Console.WriteLine("000000000000000000000000000000000000000000"); Console.WriteLine(connectionString);
-            
+            string connectionString = "Data Source=" + Directory.GetCurrentDirectory() + "\\calendar.db;Version=3;";
+            Console.WriteLine(connectionString); //Console.WriteLine("----------------------------------------------");
+
+
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
                 connection.Open();
                 
                 string monthString = $"{month:D2}";
-                string selectQuery = $"SELECT * FROM calendardates WHERE month = '{monthString}' ORDER BY start;";
-                //TODO: Where year is currentYearhNumber.
+                string selectQuery = $"SELECT * FROM calendardates WHERE month = '{monthString}' AND year = '{currentYearhNumber}' ORDER BY start;";
 
                 try
                 {
@@ -62,23 +64,23 @@ namespace CalendarApp
                     using (SQLiteCommand command = new SQLiteCommand(selectQuery, connection))
                     {
                         using (SQLiteDataReader reader = command.ExecuteReader())
-                        {
+                        { 
                             while (reader.Read())
                             {
+
                                 int id = reader.GetInt32(0);
                                 string text = reader.GetString(1);
                                 string start = reader.GetString(2);
                                 string end = reader.GetString(3);
-                                //...id, text start, end, (month, year) 
+                                 
+                                Label label = new Label();
+                                label.BackColor = Color.Blue;
 
-                                //TODO: Hier werden dann die Balken entstehen.
-                                //...und hier werde ich das ganze Zeug auch nach rechts schreiben - aber wie?
-                                //Console.WriteLine(value);   
-                                //Label label = new Label();
-                                //label.BackColor = Color.Blue;
-                                //label.Size = new Size(50, 10);
-                                //label.Location = new Point(70, 170);
-                                //Controls.Add(label);
+                                label.Size = new Size(50, 10); //TODO: Das Ende über Size regeln.
+
+                                label.Location = new Point(findXFor(start), findYFor(start));
+
+                                Controls.Add(label);
 
 
                             }
@@ -97,7 +99,78 @@ namespace CalendarApp
          
         }
 
-        
+        private int findYFor(string start)
+        { //TODO: In einer globalen Variable speichern, ob der Punkt schon da ist, wenn das neu 
+          //aufgebaut wird, diese Datenstruktur wieder löschen.
+
+            string[] arrayRowOne = { "1", "2", "3", "4", "5", "6", "7" };
+            string[] arrayRowTwo = { "8", "9", "10", "11", "12", "13", "14" };
+            string[] arrayRowThree = { "15", "16", "17", "18", "19", "20", "21" };
+            string[] arrayRowFour = { "22", "23", "24", "25", "26", "27", "28" };
+            string[] arrayRowFive = { "29", "30", "31" };
+
+            int pos = 90;
+
+            string[] dateAndTime = start.Split('T'); 
+
+            if (dateAndTime.Length > 1)
+            {
+                string date = dateAndTime[0];
+                string[] yearMonthDay = date.Split('-');
+                if (yearMonthDay.Length > 2)
+                {
+
+                    string day = yearMonthDay[2];
+
+                    if (arrayRowOne.Contains(day)) { pos = 90; }
+                    if (arrayRowTwo.Contains(day)) { pos = 165; } 
+                    if (arrayRowThree.Contains(day)) { pos = 240; }
+                    if (arrayRowFour.Contains(day)) { pos = 315; }
+                    if (arrayRowFive.Contains(day)) { pos = 390; }
+                }
+            }
+
+            return pos;
+        }
+
+        private int findXFor(string start)
+        {
+
+            string[] arrayRowOne = { "1", "8", "15", "22", "29" };
+            string[] arrayRowTwo = { "2", "9", "16", "23", "30" };
+            string[] arrayRowThree = { "3", "10", "17", "24", "31" };
+            string[] arrayRowFour = { "4", "11", "18", "25" };
+            string[] arrayRowFive = { "5", "12", "19", "26" };
+            string[] arrayRowSix = { "6", "13", "20", "27" };
+            string[] arrayRowSeven = { "7", "14", "21", "28" };
+
+            int pos = 10;
+
+            string[] dateAndTime = start.Split('T');
+
+            if (dateAndTime.Length > 1) {
+                string date = dateAndTime[0];
+                string[] yearMonthDay = date.Split('-');
+                if (yearMonthDay.Length > 2) {
+
+                    string day = yearMonthDay[2]; //Console.WriteLine(day + " ::::::::::::::::::::::::::::");
+
+                    if (arrayRowOne.Contains(day)) { pos = 10; }
+                    if (arrayRowTwo.Contains(day)) { pos = 70; }
+                    if (arrayRowThree.Contains(day)) { pos = 130; }
+                    if (arrayRowFour.Contains(day)) { pos = 190; }
+                    if (arrayRowFive.Contains(day)) { pos = 250; }
+                    if (arrayRowSix.Contains(day)) { pos = 310; }
+                    if (arrayRowSeven.Contains(day)) { pos = 370; }
+
+                }
+            }
+
+
+
+            return pos;
+        }
+
         private void displayDays(int daysInMonth, string currentMonth, string currentYearhNumber)
         {
 
@@ -141,7 +214,8 @@ namespace CalendarApp
                         label.Location = new Point(10 + i * 60, 70 + j * 75);
                         label.Text = Day.ToString();
 
-                        label.Click += UpdateCalendar;
+                        label.Click += UpdateCalendar; //TODO: Hier eher eine Methode zum anzeigen aller Termine rechts. UpdateCalendar soll ausgelöst werden, wenn 
+                        //in Abhängigkeit zu dem ausgewähltn Tag ein Plus gedrückt wird.
 
                         Day++;
                         Controls.Add(label);
@@ -164,8 +238,16 @@ namespace CalendarApp
             if (sender is Label label) {
                 senderText = label.Text;
             }
-            
-            AppointmentForm appointmentForm = new AppointmentForm(this, senderText, Text);
+
+            string[] monthYear = Text.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            string year = "2000";
+
+            if (monthYear.Length > 1) {
+                year = monthYear[0];
+            }
+        
+            AppointmentForm appointmentForm = new AppointmentForm(this, senderText, year);
             appointmentForm.ShowDialog();
              
         }
@@ -251,12 +333,6 @@ namespace CalendarApp
                 comboBoxEndMinutes.SelectedIndex = 0;
                 comboBoxEndMinutes.Location = new Point(150, 300);
 
-
-                // Endzeit auswählen.
-                //endTimePicker = new DateTimePicker();
-                //endTimePicker.Format = DateTimePickerFormat.Time;
-                //endTimePicker.Location = new Point(10, 210);
-
                 Controls.Add(datePicker);
                 Controls.Add(comboBoxStartHours);
                 Controls.Add(comboBoxStartMinutes);
@@ -305,6 +381,8 @@ namespace CalendarApp
                 string startMM = comboBoxStartMinutes.Text;
                 string endHH = comboBoxEndHours.Text;
                 string endMM = comboBoxEndMinutes.Text;
+
+                //TODO: Hier in die DB kloppen, erst dann weiter.
 
                 calendarFormInstance.displayDays(numberOfDaysInFollowingMonth(pickedMonth, pickedYear), pickedMonth, pickedYear);
                 calendarFormInstance.displayDates(pickedMonth, pickedYear);
