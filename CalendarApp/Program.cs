@@ -74,9 +74,13 @@ namespace CalendarApp
 
                                 label.Size = new Size(50, 10);
 
-                                label.Location = new Point(findXFor(start, end), findYFor(start, end));
+                                int xPos = FindXFor(start, end);
+                                int yPos = FindYFor(start, end);
 
+                                label.Location = new Point(xPos, yPos);
                                 Controls.Add(label);
+
+
 
 
                             }
@@ -95,7 +99,7 @@ namespace CalendarApp
          
         }
 
-        private static int findYFor(string start, string end)
+        private static int FindYFor(string start, string end)
         {
             string[] arrayRowOne = { "1", "2", "3", "4", "5", "6", "7" };
             string[] arrayRowTwo = { "8", "9", "10", "11", "12", "13", "14" };
@@ -113,7 +117,7 @@ namespace CalendarApp
             {
                 string day = date.Day.ToString();
 
-                // Überprüfe für jeden Tag, welcher Reihe er angehört
+                // Überprüfe für jeden Tag, zu welcher Reihe er angehört
                 if (arrayRowOne.Contains(day)) { pos = 90; }
                 if (arrayRowTwo.Contains(day)) { pos = 165; }
                 if (arrayRowThree.Contains(day)) { pos = 240; }
@@ -123,7 +127,9 @@ namespace CalendarApp
 
             return pos;
         }
-        private static int findXFor(string start, string end)
+
+
+        private static int FindXFor(string start, string end)
         {
             string[] arrayRowOne = { "1", "8", "15", "22", "29" };
             string[] arrayRowTwo = { "2", "9", "16", "23", "30" };
@@ -155,6 +161,7 @@ namespace CalendarApp
 
             return pos;
         }
+
 
         private void displayDays(int daysInMonth, string currentMonth, string currentYearhNumber)
         {
@@ -219,8 +226,6 @@ namespace CalendarApp
         }
 
    
-
-
         private void UpdateCalendar(object sender, EventArgs e)
         {
             string senderText = "1";
