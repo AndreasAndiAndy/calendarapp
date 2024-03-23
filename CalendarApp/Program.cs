@@ -68,20 +68,22 @@ namespace CalendarApp
                                 string text = reader.GetString(1);
                                 string start = reader.GetString(2);
                                 string end = reader.GetString(3);
-                                 
+
+                                for (DateTime date = DateTime.Parse(start); date <= DateTime.Parse(end); date = date.AddDays(1)) { 
+
                                 Label label = new Label();
                                 label.BackColor = Color.Blue;
 
                                 label.Size = new Size(50, 10);
 
-                                int xPos = FindXFor(start, end);
-                                int yPos = FindYFor(start, end);
+                                int xPos = FindXFor(date);
+                                int yPos = FindYFor(date);
 
                                 label.Location = new Point(xPos, yPos);
                                 Controls.Add(label);
 
 
-
+                                }
 
                             }
                         }
@@ -99,7 +101,7 @@ namespace CalendarApp
          
         }
 
-        private static int FindYFor(string start, string end)
+        private static int FindYFor(DateTime date)
         {
             string[] arrayRowOne = { "1", "2", "3", "4", "5", "6", "7" };
             string[] arrayRowTwo = { "8", "9", "10", "11", "12", "13", "14" };
@@ -109,12 +111,6 @@ namespace CalendarApp
 
             int pos = 90;
 
-            DateTime startDate = DateTime.Parse(start);
-            DateTime endDate = DateTime.Parse(end);
-
-            // Iteriere über alle Tage zwischen start und end
-            for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
-            {
                 string day = date.Day.ToString();
 
                 // Überprüfe für jeden Tag, zu welcher Reihe er angehört
@@ -123,13 +119,12 @@ namespace CalendarApp
                 if (arrayRowThree.Contains(day)) { pos = 240; }
                 if (arrayRowFour.Contains(day)) { pos = 315; }
                 if (arrayRowFive.Contains(day)) { pos = 390; }
-            }
-
+            
             return pos;
         }
 
 
-        private static int FindXFor(string start, string end)
+        private static int FindXFor(DateTime date)
         {
             string[] arrayRowOne = { "1", "8", "15", "22", "29" };
             string[] arrayRowTwo = { "2", "9", "16", "23", "30" };
@@ -141,13 +136,7 @@ namespace CalendarApp
 
             int pos = 10;
 
-            DateTime startDate = DateTime.Parse(start);
-            DateTime endDate = DateTime.Parse(end);
-
-            // Iteriere über alle Tage zwischen start und end
-            for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
-            {
-                string day = date.Day.ToString();
+            string day = date.Day.ToString();
 
                 // Überprüfe für jeden Tag, zu welcher Reihe er angehört
                 if (arrayRowOne.Contains(day)) { pos = 10; }
@@ -157,9 +146,10 @@ namespace CalendarApp
                 if (arrayRowFive.Contains(day)) { pos = 250; }
                 if (arrayRowSix.Contains(day)) { pos = 310; }
                 if (arrayRowSeven.Contains(day)) { pos = 370; }
-            }
 
             return pos;
+
+
         }
 
 
