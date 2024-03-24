@@ -8,6 +8,11 @@ using System.Resources;
 using System.Collections.Generic;
 using System.Linq;
 
+/*
+Was noch implementiert werden muss, ist die Logik zum Hin- und Hernavigieren im Kalender.  
+Wenn navigiert wird, sollen keine Tagestermine dargestellt werden.
+*/
+
 namespace CalendarApp
 {
     public class CalendarForm : Form
@@ -30,7 +35,9 @@ namespace CalendarApp
             displayDaysMonthAndAppointment(daysInMonth, currentDayNumber, currentMonthNumber, currentYearhNumber);
 
             Size = new System.Drawing.Size(900, 500);
-            
+
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+
         }
 
 
@@ -208,7 +215,7 @@ namespace CalendarApp
                         label.Text = Day.ToString();
                         label.Click += (sender, e) =>
                         {
-                            ShowAppointments("Test.");
+                            ShowAppointments(day, month, year);
                         };
 
                         Day++;
@@ -223,9 +230,53 @@ namespace CalendarApp
             Controls.Add(plus);
         }
 
-        private void ShowAppointments(string test)
+        private void ShowAppointments(string day, string month, string year)
         {
-            Help.ShowPopup(this, test, new Point(50, 50));
+            /*
+            Was noch implementiert werden muss, sind die Tagestermine.
+
+            Was noch implementiert werden muss, ist eine Logik zum Löschen von Terminen.
+            Wenn ein Termin gelöscht wird, dann muss die displayDays() und die displayDates()
+            aufgerufen werden, vorher den zu löschenden Termin aus der Datenbank löschen, dann wird das schon gutgehen.
+            */
+
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+            var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(CalendarForm).Assembly);
+
+            // Erstelle DataGridView
+            DataGridView dataGridView = new DataGridView();
+
+            //dataGridView.Size = new Size(400, 400);
+            dataGridView.Location = new Point(450, 20);
+
+            dataGridView.AllowUserToAddRows = false; // Verhindert eine zusätzliche leere Zeile am Ende
+            dataGridView.AllowUserToResizeRows = false; // Verhindert die Änderung der Zeilenhöhe durch den Benutzer
+            dataGridView.ScrollBars = ScrollBars.Vertical; // Legt die Art der Scrollleiste fest.
+
+            // Berechnung der Höhe basierend auf der Anzahl der Zeilen und der Höhe einer einzelnen Zeile
+            int rowHeight = dataGridView.RowTemplate.Height;
+            int numRowsToShow = 10; // Anzahl der Zeilen, die angezeigt werden sollen
+            int totalRowHeight = numRowsToShow * rowHeight;
+            dataGridView.Height = totalRowHeight + dataGridView.ColumnHeadersHeight;
+            
+            // Füge Spalten zur DataGridView hinzu
+            dataGridView.Columns.Add("Start", rm.GetString("Start"));
+            dataGridView.Columns.Add("End", rm.GetString("End"));
+
+            dataGridView.Width = 425;
+            dataGridView.Columns[0].Width = 200;
+            dataGridView.Columns[1].Width = 200;
+
+            // Beispiel zum Hinzufügen von Daten (ersetzen Sie dies durch Ihre eigenen Daten)
+            for (int i = 0; i < 50; i++)
+            {
+                dataGridView.Rows.Add("Daten " + i, "Weitere Daten " + i);
+            }
+
+
+            // Füge DataGridView zum Formular hinzu
+            Controls.Add(dataGridView);
+
         }
 
         private void UpdateCalendar(object sender, EventArgs e)
@@ -236,14 +287,13 @@ namespace CalendarApp
              
         }
 
-        private void displayDaysMonthAndAppointment(int daysInMonth, string currentDayNumber, string currentMonthNumber, string currentYearhNumber)
+        private void displayDaysMonthAndAppointment(int daysInMonth, string currentDayNumber, string currentMonthNumber, string currentYearNumber)
         {
 
-            //TODO: Statt der ersten null übergehe ich ein Objekt bestehend aus string currentDayNumber, string currentMonthNumber, string currentYearhNumber.
-            ShowAppointments("Test.");
+            ShowAppointments(currentDayNumber, currentMonthNumber, currentYearNumber);
 
-            displayDays(daysInMonth, currentDayNumber, currentMonthNumber, currentYearhNumber);
-            displayDates(currentDayNumber, currentMonthNumber, currentYearhNumber);
+            displayDays(daysInMonth, currentDayNumber, currentMonthNumber, currentYearNumber);
+            displayDates(currentDayNumber, currentMonthNumber, currentYearNumber);
         }
 
         private string numberToMonth(string currentMonth)
@@ -265,6 +315,8 @@ namespace CalendarApp
             
             public AppointmentForm(CalendarForm calendarForm, string dayNumber, string monthNumber, string yearNumber)
             {
+                this.FormBorderStyle = FormBorderStyle.FixedDialog;
+
                 CultureInfo.CurrentCulture = new CultureInfo("de-DE");
                 rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
 
@@ -353,11 +405,7 @@ namespace CalendarApp
                 Controls.Add(dateSaveButton);
 
             }
-
-
-            //TODO: Natürlich auch das Enddatum einlesen.
-            //Außerdem muss dafür gesorgt werden, dass erst alles in die DB gekloppt wird, und das fertig ist,
-            //bevor das Programm überhaupt weiterläuft.
+             
             private void UpdateDate(object sender, EventArgs e)
             { 
 
@@ -454,7 +502,7 @@ namespace CalendarApp
                     return true;
                 }
 
-                return false;
+                
             }
 
             private void setHours()
