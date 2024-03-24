@@ -153,4 +153,7 @@
   <data name="Start" xml:space="preserve">
     <value>Beginn</value>
   </data>
+  <data name="Date" xml:space="preserve">
+    <value>Termin</value>
+  </data>
 </root>

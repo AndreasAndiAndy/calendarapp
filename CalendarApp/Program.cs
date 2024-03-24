@@ -8,10 +8,10 @@ using System.Resources;
 using System.Collections.Generic;
 using System.Linq;
 
-/*
-Was noch implementiert werden muss, ist die Logik zum Hin- und Hernavigieren im Kalender.  
-Wenn navigiert wird, sollen keine Tagestermine dargestellt werden.
-*/
+
+//TODO:
+//Was noch implementiert werden muss, ist die Logik zum Hin- und Hernavigieren im Kalender.  
+//Wenn navigiert wird, sollen keine Tagestermine dargestellt werden.
 
 namespace CalendarApp
 {
@@ -232,13 +232,6 @@ namespace CalendarApp
 
         private void ShowAppointments(string day, string month, string year)
         {
-            /*
-            Was noch implementiert werden muss, sind die Tagestermine.
-
-            Was noch implementiert werden muss, ist eine Logik zum Löschen von Terminen.
-            Wenn ein Termin gelöscht wird, dann muss die displayDays() und die displayDates()
-            aufgerufen werden, vorher den zu löschenden Termin aus der Datenbank löschen, dann wird das schon gutgehen.
-            */
 
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
             var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(CalendarForm).Assembly);
@@ -260,19 +253,61 @@ namespace CalendarApp
             dataGridView.Height = totalRowHeight + dataGridView.ColumnHeadersHeight;
             
             // Füge Spalten zur DataGridView hinzu
-            dataGridView.Columns.Add("Start", rm.GetString("Start"));
-            dataGridView.Columns.Add("End", rm.GetString("End"));
+            dataGridView.Columns.Add("Date", rm.GetString("Date"));
+            dataGridView.Columns.Add("Time", rm.GetString("Start") + "-" + rm.GetString("End"));
 
             dataGridView.Width = 425;
-            dataGridView.Columns[0].Width = 200;
-            dataGridView.Columns[1].Width = 200;
+            dataGridView.Columns[0].Width = 180;
+            dataGridView.Columns[1].Width = 220;
 
-            // Beispiel zum Hinzufügen von Daten (ersetzen Sie dies durch Ihre eigenen Daten)
-            for (int i = 0; i < 50; i++)
+            string connectionString = "Data Source=" + Directory.GetCurrentDirectory() + "\\calendar.db;Version=3;";
+            using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
-                dataGridView.Rows.Add("Daten " + i, "Weitere Daten " + i);
+                connection.Open();
+
+                int intMonth = Int32.Parse(month);
+
+                string monthString = $"{intMonth:D2}";
+                string selectQuery = $"SELECT * FROM calendardates WHERE month = '{monthString}' AND year = '{year}' ORDER BY start;";
+
+                try
+                {
+
+                    using (SQLiteCommand command = new SQLiteCommand(selectQuery, connection))
+                    {
+                        using (SQLiteDataReader reader = command.ExecuteReader())
+                        { 
+                            while (reader.Read())
+                            {
+                                
+                                //TODO:
+                                //Wir haben day. Alle Termine, die an DIESEM day sind
+                                //oder falls day zwischen Beginn und Ende liegt.
+
+                                string text = reader.GetString(1);
+                                string start = reader.GetString(2);
+                                string end = reader.GetString(3);
+                                
+                                dataGridView.Rows.Add(text, start.Split('T')[0] + ", " + start.Split('T')[1].Substring(0, 5) + " " + end.Split('T')[0] + ", " + end.Split('T')[1].Substring(0, 5));
+
+
+                            }
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Fehler beim Verbinden zur Datenbank: {ex.Message}");
+                }
+
+                connection.Close();
             }
 
+         
+        
+             
+           
 
             // Füge DataGridView zum Formular hinzu
             Controls.Add(dataGridView);
@@ -330,11 +365,12 @@ namespace CalendarApp
                 //Text festlegen.
                 editableTextBox = new TextBox
                 {
-                    AcceptsReturn = true,
-                    AcceptsTab = true,
-                    Dock = System.Windows.Forms.DockStyle.Fill,
-                    Multiline = true,
-                    ScrollBars = System.Windows.Forms.ScrollBars.Vertical
+                    AcceptsReturn = false,
+                    AcceptsTab = false,
+                    //Dock = System.Windows.Forms.DockStyle.Fill,
+                    Multiline = false,
+                    //ScrollBars = System.Windows.Forms.ScrollBars.Vertical
+                    Width = 300
                 };
 
                 // Hier die Höhe anpassen, z.B. dreimal so hoch wie zuvor
