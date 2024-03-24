@@ -232,11 +232,19 @@ namespace CalendarApp
             left.Size = new Size(50, 50);
             left.Location = new Point(80, 20);
             left.Text = "<";
+            left.Click += (sender, e) =>
+             {
+                 Shift();
+             };
 
             Label right = new Label();
             right.Size = new Size(50, 50);
             right.Location = new Point(150, 20);
             right.Text = ">";
+            right.Click += (sender, e) =>
+            {
+                Shift();
+            };
 
             for (int j = 0; j < 5; j++)
             {
@@ -269,6 +277,11 @@ namespace CalendarApp
             Controls.Add(plus);
             Controls.Add(left);
             Controls.Add(right);
+        }
+
+        private void Shift()
+        {
+            throw new NotImplementedException();
         }
 
         //Es werden für den aktuell angezeiten Monat innerhalb des aktuell angezeigten Jahres die Termine an einem Tag angezeigt. 
