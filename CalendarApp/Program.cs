@@ -228,6 +228,16 @@ namespace CalendarApp
             plus.Text = "+";
             plus.Click += UpdateCalendar;
 
+            Label left = new Label();
+            left.Size = new Size(50, 50);
+            left.Location = new Point(80, 20);
+            left.Text = "<";
+
+            Label right = new Label();
+            right.Size = new Size(50, 50);
+            right.Location = new Point(150, 20);
+            right.Text = ">";
+
             for (int j = 0; j < 5; j++)
             {
 
@@ -257,6 +267,8 @@ namespace CalendarApp
                  
             }
             Controls.Add(plus);
+            Controls.Add(left);
+            Controls.Add(right);
         }
 
         //Es werden für den aktuell angezeiten Monat innerhalb des aktuell angezeigten Jahres die Termine an einem Tag angezeigt. 
@@ -290,13 +302,8 @@ namespace CalendarApp
                                 string start = reader.GetString(2);
                                 string end = reader.GetString(3);
 
-                                //Console.WriteLine(year + "-" + month + "-" + day);
-                                //Console.WriteLine(start.Split('T')[0]);
-                                //Console.WriteLine(end.Split('T')[0]);
-
                                 bool isBetween = DatumPruefen(year + "-" + month + "-" + day, start.Split('T')[0], end.Split('T')[0]);
                                 
-
                                 if (isBetween) {
                                    dataGridView.Rows.Add(text, start.Split('T')[0] + ", " + start.Split('T')[1].Substring(0, 5) + " " + end.Split('T')[0] + ", " + end.Split('T')[1].Substring(0, 5));
                                 }
@@ -315,10 +322,6 @@ namespace CalendarApp
             }
 
          
-        
-             
-           
-
             // Füge DataGridView zum Formular hinzu
             Controls.Add(dataGridView);
 
@@ -374,12 +377,7 @@ namespace CalendarApp
                                 string start = reader.GetString(2);
                                 string end = reader.GetString(3);
 
-                                //Console.WriteLine(year + "-" + month + "-" + day);
-                                //Console.WriteLine(start.Split('T')[0]);
-                                //Console.WriteLine(end.Split('T')[0]);
-
                                 bool isBetween = DatumPruefen(currentYearNumber + "-" + currentMonthNumber + "-" + currentDayNumber, start.Split('T')[0], end.Split('T')[0]);
-
 
                                 if (isBetween)
                                 {
@@ -401,13 +399,9 @@ namespace CalendarApp
 
 
 
-
-
-
             // Füge DataGridView zum Formular hinzu
             Controls.Add(dataGridView);
-
-       
+            
             displayDays(daysInMonth, currentDayNumber, currentMonthNumber, currentYearNumber);
             displayDates(currentDayNumber, currentMonthNumber, currentYearNumber);
         }
@@ -529,7 +523,6 @@ namespace CalendarApp
             { 
 
                 // Lese den eingegebenen Text aus dem Textfeld
-                
                 DateTime pickedDateStrt = datePickerStrt.Value;
                 string completeDateStrt = pickedDateStrt.ToString("yyyy-MM-dd");
 
