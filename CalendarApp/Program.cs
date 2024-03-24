@@ -27,7 +27,7 @@ namespace CalendarApp
             string currentMonthNumber = now.ToString("MM");
             string currentYearhNumber = now.ToString("yyyy");
 
-            displayDaysAndMonth(daysInMonth, currentDayNumber, currentMonthNumber, currentYearhNumber);
+            displayDaysMonthAndAppointment(daysInMonth, currentDayNumber, currentMonthNumber, currentYearhNumber);
 
             Size = new System.Drawing.Size(900, 500);
             
@@ -206,8 +206,11 @@ namespace CalendarApp
                         label.Size = new Size(50, 20);
                         label.Location = new Point(10 + i * 60, 70 + j * 75);
                         label.Text = Day.ToString();
-                        //label.Click += UpdateCalendar; 
-                         
+                        label.Click += (sender, e) =>
+                        {
+                            ShowAppointments("Test.");
+                        };
+
                         Day++;
                         Controls.Add(label);
 
@@ -220,18 +223,25 @@ namespace CalendarApp
             Controls.Add(plus);
         }
 
-   
+        private void ShowAppointments(string test)
+        {
+            Help.ShowPopup(this, test, new Point(50, 50));
+        }
+
         private void UpdateCalendar(object sender, EventArgs e)
         {   
-                
             AppointmentForm appointmentForm = new AppointmentForm(this, fieldDayNumber, fieldMonthNumber, fieldYearNumber);
         
             appointmentForm.ShowDialog();
              
         }
 
-        private void displayDaysAndMonth(int daysInMonth, string currentDayNumber, string currentMonthNumber, string currentYearhNumber)
+        private void displayDaysMonthAndAppointment(int daysInMonth, string currentDayNumber, string currentMonthNumber, string currentYearhNumber)
         {
+
+            //TODO: Statt der ersten null übergehe ich ein Objekt bestehend aus string currentDayNumber, string currentMonthNumber, string currentYearhNumber.
+            ShowAppointments("Test.");
+
             displayDays(daysInMonth, currentDayNumber, currentMonthNumber, currentYearhNumber);
             displayDates(currentDayNumber, currentMonthNumber, currentYearhNumber);
         }
@@ -340,43 +350,74 @@ namespace CalendarApp
                 dateSaveButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
                 dateSaveButton.Click += UpdateDate;
 
-
                 Controls.Add(dateSaveButton);
 
             }
 
 
             //TODO: Natürlich auch das Enddatum einlesen.
+            //Außerdem muss dafür gesorgt werden, dass erst alles in die DB gekloppt wird, und das fertig ist,
+            //bevor das Programm überhaupt weiterläuft.
             private void UpdateDate(object sender, EventArgs e)
             { 
 
                 // Lese den eingegebenen Text aus dem Textfeld
-                string enteredText = editableTextBox.Text;
+                
+                DateTime pickedDateStrt = datePickerStrt.Value;
+                string completeDateStrt = pickedDateStrt.ToString("yyyy-MM-dd");
 
-                DateTime pickedDate = datePickerStrt.Value;
-                string completeDate = pickedDate.ToString("yyyy-MM-dd");
+                DateTime pickedDateEnd = datePickerEnd.Value;
+                string completeDateEnd = pickedDateEnd.ToString("yyyy-MM-dd");
 
-                string pickedYear = completeDate.Split('-')[0];
-                string pickedMonth = completeDate.Split('-')[1];
-                string pickedDay = completeDate.Split('-')[2];
+                string pickedYear = completeDateStrt.Split('-')[0];
+                string pickedMonth = completeDateStrt.Split('-')[1];
+                string pickedDay = completeDateStrt.Split('-')[2];
+
+                string pickedYearEnd = completeDateEnd.Split('-')[0];
+                string pickedMonthEnd = completeDateEnd.Split('-')[1];
+                string pickedDayEnd = completeDateEnd.Split('-')[2];
 
                 string startHH = comboBoxStartHours.Text;
                 string startMM = comboBoxStartMinutes.Text;
                 string endHH = comboBoxEndHours.Text;
                 string endMM = comboBoxEndMinutes.Text;
 
-                string connectionString = "";
+                //////////////////////////////////////////
+
+                string text = editableTextBox.Text;
+                string start = completeDateStrt + "T" + startHH + ":" + startMM + ":00";
+                string end = pickedYearEnd + "-" + pickedMonthEnd + "-" + pickedDayEnd + "T" + endHH + ":" + endMM + ":00";
+                string month = pickedMonth;
+                string year = pickedYear;
+
+                bool isStartBeforeEnd = startBeforeEnd(start, end);
+
+                //////////////////////////////////////////
+
+                if (isStartBeforeEnd) { 
+
+                string connectionString = "Data Source=" + Directory.GetCurrentDirectory() + "\\calendar.db;Version=3;";
                 using (SQLiteConnection connection = new SQLiteConnection(connectionString))
                 {
                     connection.Open();
 
-                    string selectQuery = "";//$"SELECT * FROM calendardates WHERE month = '{monthString}' AND year = '{currentYearhNumber}' ORDER BY start;";
+                    string insertQuery = "INSERT INTO calendardates (text, start, end, month, year) VALUES (@Text, @Start, @End, @Month, @Year)";
 
                     try
                     {
+                         
+                        using (SQLiteCommand command = new SQLiteCommand(insertQuery, connection))
+                        {
+                            command.Parameters.AddWithValue("@Text", text);
+                            command.Parameters.AddWithValue("@Start", start);
+                            command.Parameters.AddWithValue("@End", end);
+                            command.Parameters.AddWithValue("@Month", month);
+                            command.Parameters.AddWithValue("@Year", year);
 
-                        using (SQLiteCommand command = new SQLiteCommand(selectQuery, connection))
-                        { }
+                            int rowsAffected = command.ExecuteNonQuery();
+                            Console.WriteLine("Eingefügte Datensätze: " + rowsAffected);
+                        }
+                         
 
                     }
                     catch (Exception ex)
@@ -386,9 +427,34 @@ namespace CalendarApp
 
                 }
 
-               calendarFormInstance.displayDays(numberOfDaysInFollowingMonth(pickedMonth, pickedYear), pickedDay, pickedMonth, pickedYear);
+                }
+
+               calendarFormInstance.displayDays(numberOfDaysInThisMonthAndYear(pickedMonth, pickedYear), pickedDay, pickedMonth, pickedYear);
                calendarFormInstance.displayDates(pickedDay, pickedMonth, pickedYear);
                 
+            }
+
+            private bool startBeforeEnd(string start, string end)
+            {
+                // DateTime-Objekte aus den Zeichenfolgen erstellen
+                DateTime datumA = DateTime.Parse(start);
+                DateTime datumB = DateTime.Parse(end);
+
+                // Prüfen, ob Datum A vor Datum B liegt
+                if (datumA < datumB)
+                {
+                    return true;
+                }
+                else if (datumA > datumB)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+
+                return false;
             }
 
             private void setHours()
@@ -411,7 +477,7 @@ namespace CalendarApp
                 }
             }
 
-            int numberOfDaysInFollowingMonth(string monthNumber, string year) {
+            int numberOfDaysInThisMonthAndYear(string monthNumber, string year) {
 
                 bool isLeapYear = DateTime.IsLeapYear(Int32.Parse(year));
 
