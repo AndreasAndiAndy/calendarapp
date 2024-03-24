@@ -156,4 +156,7 @@
   <data name="Date" xml:space="preserve">
     <value>Termin</value>
   </data>
+  <data name="My Event" xml:space="preserve">
+    <value>Mein Ereignis</value>
+  </data>
 </root>

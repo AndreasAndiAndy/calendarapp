@@ -13,16 +13,20 @@ using System.Linq;
 //Was noch implementiert werden muss, ist die Logik zum Hin- und Hernavigieren im Kalender.  
 //Wenn navigiert wird, sollen keine Tagestermine dargestellt werden.
 
+
 namespace CalendarApp
 {
     public class CalendarForm : Form
     {
 
+
         private DateTime now = DateTime.Now;
         private string fieldDayNumber; private string fieldMonthNumber; private string fieldYearNumber;
+        private DataGridView dataGridView;
 
         public CalendarForm()
         {
+            
 
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
             var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(CalendarForm).Assembly);
@@ -32,11 +36,36 @@ namespace CalendarApp
             string currentMonthNumber = now.ToString("MM");
             string currentYearhNumber = now.ToString("yyyy");
 
-            displayDaysMonthAndAppointment(daysInMonth, currentDayNumber, currentMonthNumber, currentYearhNumber);
-
             Size = new System.Drawing.Size(900, 500);
 
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
+
+            // Erstelle DataGridView
+            dataGridView = new DataGridView();
+
+            //dataGridView.Size = new Size(400, 400);
+            dataGridView.Location = new Point(450, 20);
+
+            dataGridView.AllowUserToAddRows = false; // Verhindert eine zusätzliche leere Zeile am Ende
+            dataGridView.AllowUserToResizeRows = false; // Verhindert die Änderung der Zeilenhöhe durch den Benutzer
+            dataGridView.ScrollBars = ScrollBars.Vertical; // Legt die Art der Scrollleiste fest.
+
+            // Berechnung der Höhe basierend auf der Anzahl der Zeilen und der Höhe einer einzelnen Zeile
+            int rowHeight = dataGridView.RowTemplate.Height;
+            int numRowsToShow = 10; // Anzahl der Zeilen, die angezeigt werden sollen
+            int totalRowHeight = numRowsToShow * rowHeight;
+            dataGridView.Height = totalRowHeight + dataGridView.ColumnHeadersHeight;
+
+            // Füge Spalten zur DataGridView hinzu
+            dataGridView.Columns.Add("Date", rm.GetString("Date"));
+            dataGridView.Columns.Add("Time", rm.GetString("Start") + "-" + rm.GetString("End"));
+
+            dataGridView.Width = 425;
+            dataGridView.Columns[0].Width = 180;
+            dataGridView.Columns[1].Width = 220;
+
+            displayDaysMonthAndAppointment(daysInMonth, currentDayNumber, currentMonthNumber, currentYearhNumber);
+
 
         }
 
@@ -51,7 +80,7 @@ namespace CalendarApp
 
             string connectionString = "Data Source=" + Directory.GetCurrentDirectory() + "\\calendar.db;Version=3;";
             //cd C:\Users\user\source\repos\calendarapp\CalendarApp\bin\Debug
-            //sqlite3 example.db
+            //sqlite3 calendar.db
             //.tables select *
 
 
@@ -215,7 +244,7 @@ namespace CalendarApp
                         label.Text = Day.ToString();
                         label.Click += (sender, e) =>
                         {
-                            ShowAppointments(day, month, year);
+                            ShowAppointments(label.Text, month, year);
                         };
 
                         Day++;
@@ -230,35 +259,13 @@ namespace CalendarApp
             Controls.Add(plus);
         }
 
+        //Es werden für den aktuell angezeiten Monat innerhalb des aktuell angezeigten Jahres die Termine an einem Tag angezeigt. 
         private void ShowAppointments(string day, string month, string year)
         {
+            dataGridView.Rows.Clear();
 
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
             var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(CalendarForm).Assembly);
-
-            // Erstelle DataGridView
-            DataGridView dataGridView = new DataGridView();
-
-            //dataGridView.Size = new Size(400, 400);
-            dataGridView.Location = new Point(450, 20);
-
-            dataGridView.AllowUserToAddRows = false; // Verhindert eine zusätzliche leere Zeile am Ende
-            dataGridView.AllowUserToResizeRows = false; // Verhindert die Änderung der Zeilenhöhe durch den Benutzer
-            dataGridView.ScrollBars = ScrollBars.Vertical; // Legt die Art der Scrollleiste fest.
-
-            // Berechnung der Höhe basierend auf der Anzahl der Zeilen und der Höhe einer einzelnen Zeile
-            int rowHeight = dataGridView.RowTemplate.Height;
-            int numRowsToShow = 10; // Anzahl der Zeilen, die angezeigt werden sollen
-            int totalRowHeight = numRowsToShow * rowHeight;
-            dataGridView.Height = totalRowHeight + dataGridView.ColumnHeadersHeight;
-            
-            // Füge Spalten zur DataGridView hinzu
-            dataGridView.Columns.Add("Date", rm.GetString("Date"));
-            dataGridView.Columns.Add("Time", rm.GetString("Start") + "-" + rm.GetString("End"));
-
-            dataGridView.Width = 425;
-            dataGridView.Columns[0].Width = 180;
-            dataGridView.Columns[1].Width = 220;
 
             string connectionString = "Data Source=" + Directory.GetCurrentDirectory() + "\\calendar.db;Version=3;";
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
@@ -269,7 +276,6 @@ namespace CalendarApp
 
                 string monthString = $"{intMonth:D2}";
                 string selectQuery = $"SELECT * FROM calendardates WHERE month = '{monthString}' AND year = '{year}' ORDER BY start;";
-
                 try
                 {
 
@@ -280,16 +286,20 @@ namespace CalendarApp
                             while (reader.Read())
                             {
                                 
-                                //TODO:
-                                //Wir haben day. Alle Termine, die an DIESEM day sind
-                                //oder falls day zwischen Beginn und Ende liegt.
-
                                 string text = reader.GetString(1);
                                 string start = reader.GetString(2);
                                 string end = reader.GetString(3);
-                                
-                                dataGridView.Rows.Add(text, start.Split('T')[0] + ", " + start.Split('T')[1].Substring(0, 5) + " " + end.Split('T')[0] + ", " + end.Split('T')[1].Substring(0, 5));
 
+                                //Console.WriteLine(year + "-" + month + "-" + day);
+                                //Console.WriteLine(start.Split('T')[0]);
+                                //Console.WriteLine(end.Split('T')[0]);
+
+                                bool isBetween = DatumPruefen(year + "-" + month + "-" + day, start.Split('T')[0], end.Split('T')[0]);
+                                
+
+                                if (isBetween) {
+                                   dataGridView.Rows.Add(text, start.Split('T')[0] + ", " + start.Split('T')[1].Substring(0, 5) + " " + end.Split('T')[0] + ", " + end.Split('T')[1].Substring(0, 5));
+                                }
 
                             }
                         }
@@ -314,6 +324,15 @@ namespace CalendarApp
 
         }
 
+        private bool DatumPruefen(string datumYMD, string start, string end)
+        {
+            DateTime datum = DateTime.ParseExact(datumYMD, "yyyy-MM-dd", null);
+            DateTime startDatum = DateTime.ParseExact(start, "yyyy-MM-dd", null);
+            DateTime endDatum = DateTime.ParseExact(end, "yyyy-MM-dd", null);
+
+            return startDatum <= datum && datum <= endDatum;
+        }
+
         private void UpdateCalendar(object sender, EventArgs e)
         {   
             AppointmentForm appointmentForm = new AppointmentForm(this, fieldDayNumber, fieldMonthNumber, fieldYearNumber);
@@ -325,11 +344,75 @@ namespace CalendarApp
         private void displayDaysMonthAndAppointment(int daysInMonth, string currentDayNumber, string currentMonthNumber, string currentYearNumber)
         {
 
-            ShowAppointments(currentDayNumber, currentMonthNumber, currentYearNumber);
+ 
 
+            dataGridView.Rows.Clear();
+
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+            var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(CalendarForm).Assembly);
+
+            string connectionString = "Data Source=" + Directory.GetCurrentDirectory() + "\\calendar.db;Version=3;";
+            using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+            {
+                connection.Open();
+
+                int intMonth = Int32.Parse(currentMonthNumber);
+
+                string monthString = $"{intMonth:D2}";
+                string selectQuery = $"SELECT * FROM calendardates WHERE month = '{monthString}' AND year = '{currentYearNumber}' ORDER BY start;";
+                try
+                {
+
+                    using (SQLiteCommand command = new SQLiteCommand(selectQuery, connection))
+                    {
+                        using (SQLiteDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+
+                                string text = reader.GetString(1);
+                                string start = reader.GetString(2);
+                                string end = reader.GetString(3);
+
+                                //Console.WriteLine(year + "-" + month + "-" + day);
+                                //Console.WriteLine(start.Split('T')[0]);
+                                //Console.WriteLine(end.Split('T')[0]);
+
+                                bool isBetween = DatumPruefen(currentYearNumber + "-" + currentMonthNumber + "-" + currentDayNumber, start.Split('T')[0], end.Split('T')[0]);
+
+
+                                if (isBetween)
+                                {
+                                    dataGridView.Rows.Add(text, start.Split('T')[0] + ", " + start.Split('T')[1].Substring(0, 5) + " " + end.Split('T')[0] + ", " + end.Split('T')[1].Substring(0, 5));
+                                }
+
+                            }
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Fehler beim Verbinden zur Datenbank: {ex.Message}");
+                }
+
+                connection.Close();
+            }
+
+
+
+
+
+
+            // Füge DataGridView zum Formular hinzu
+            Controls.Add(dataGridView);
+
+       
             displayDays(daysInMonth, currentDayNumber, currentMonthNumber, currentYearNumber);
             displayDates(currentDayNumber, currentMonthNumber, currentYearNumber);
         }
+
+
 
         private string numberToMonth(string currentMonth)
         {
@@ -466,17 +549,18 @@ namespace CalendarApp
                 string endHH = comboBoxEndHours.Text;
                 string endMM = comboBoxEndMinutes.Text;
 
-                //////////////////////////////////////////
-
                 string text = editableTextBox.Text;
+
+                if (string.IsNullOrEmpty(text)) {
+                    text = rm.GetString("My Event");
+                }
+
                 string start = completeDateStrt + "T" + startHH + ":" + startMM + ":00";
                 string end = pickedYearEnd + "-" + pickedMonthEnd + "-" + pickedDayEnd + "T" + endHH + ":" + endMM + ":00";
                 string month = pickedMonth;
                 string year = pickedYear;
 
                 bool isStartBeforeEnd = startBeforeEnd(start, end);
-
-                //////////////////////////////////////////
 
                 if (isStartBeforeEnd) { 
 
@@ -515,7 +599,8 @@ namespace CalendarApp
 
                calendarFormInstance.displayDays(numberOfDaysInThisMonthAndYear(pickedMonth, pickedYear), pickedDay, pickedMonth, pickedYear);
                calendarFormInstance.displayDates(pickedDay, pickedMonth, pickedYear);
-                
+
+                this.Close();
             }
 
             private bool startBeforeEnd(string start, string end)
