@@ -215,7 +215,7 @@ namespace CalendarApp
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
             var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(AppointmentForm).Assembly);
 
-            Text = rm.GetString(numberToMonth(month)) + "  " + year;
+            Text = year + " " + rm.GetString(numberToMonth(month)) + "  " + day;
 
             int Day = 1; int maxNumberOfDays = 0;
 
@@ -231,7 +231,7 @@ namespace CalendarApp
             left.Text = "<";
             left.Click += (sender, e) =>
              {
-                 Shift(year, month, day, "<");
+                 Shift(year, month, "<");
              };
 
             Label right = new Label();
@@ -240,7 +240,7 @@ namespace CalendarApp
             right.Text = ">";
             right.Click += (sender, e) =>
             {
-                Shift(year, month, day, ">");
+                Shift(year, month, ">");
             };
 
             for (int j = 0; j < 5; j++)
@@ -277,18 +277,15 @@ namespace CalendarApp
         }
 
         
-        private void Shift(string year, string month, string day, string direction)
+        private void Shift(string year, string month, string direction)
         {
+            Console.WriteLine("-----------------------------");
+
             //TODO:
             //Im Grunde muss nur der Monat und im Dezember das Jahr hochgezählt werden (oder runter, je nach Pfeil).
 
-            if (direction.Equals("<")) {
-
-                Console.WriteLine("-----------------------------");
-                Console.WriteLine(year);
-                Console.WriteLine(month);
-                Console.WriteLine(day);
-
+            if (direction.Equals(">")) {
+                
                 // Datum mit dem gegebenen Monat und dem ersten Tag des Monats erstellen
                 DateTime dt = DateTime.ParseExact(month, "MM", CultureInfo.InvariantCulture);
 
@@ -298,23 +295,59 @@ namespace CalendarApp
                 // Den neuen Monat als String im Format "MM" erhalten
                 string nextMonth = dt.ToString("MM");
 
+                if (nextMonth.Equals("01")) {
+
+                    month = nextMonth;
+
+                    DateTime date = new DateTime(int.Parse(year), 1, 1);
+
+                    // Ein Jahr zum Datum hinzufügen
+                    date = date.AddYears(1);
+
+                    // Datum in eine Zeichenfolge im gewünschten Format konvertieren
+                    string incrementedYear = date.ToString("yyyy");
+
+                    year = incrementedYear;
+                }
+
 
             }
-            else if (direction.Equals(">")) {
+            else if (direction.Equals("<")) {
 
-                Console.WriteLine("-----------------------------");
-                Console.WriteLine(year);
-                Console.WriteLine(month);
-                Console.WriteLine(day);
+                // Datum mit dem gegebenen Monat und dem ersten Tag des Monats erstellen
+                DateTime dt = DateTime.ParseExact(month, "MM", CultureInfo.InvariantCulture);
+
+                // Den Monat um eins erhöhen
+                dt = dt.AddMonths(-1);
+
+                // Den neuen Monat als String im Format "MM" erhalten
+                string nextMonth = dt.ToString("MM");
+
+                if (nextMonth.Equals("12"))
+                {
+
+                    month = nextMonth;
+
+                    DateTime date = new DateTime(int.Parse(year), 1, 1);
+
+                    // Ein Jahr zum Datum hinzufügen
+                    date = date.AddYears(-1);
+
+                    // Datum in eine Zeichenfolge im gewünschten Format konvertieren
+                    string incrementedYear = date.ToString("yyyy");
+
+                    year = incrementedYear;
+                }
 
             }
 
+            //string daysInMonth = calendarFormInstance.numberOfDaysInThisMonthAndYear(month, year);
 
-
-            //displayDays(daysInMonth, fieldDayNumber, fieldMonthNumber, fieldYearNumber);
-            //displayDates(fieldDayNumber, fieldMonthNumber, fieldYearNumber);
+            //displayDays(daysInMonth, "01", month, year);
+            //displayDates("01", month, year);
 
         }
+
 
 
         //Es werden für den aktuell angezeigten Monat innerhalb des aktuell angezeigten Jahres die Termine an einem Tag angezeigt. 
@@ -447,7 +480,6 @@ namespace CalendarApp
 
             // Füge DataGridView zum Formular hinzu
             Controls.Add(dataGridView);
-            
             displayDays(daysInMonth, currentDayNumber, currentMonthNumber, currentYearNumber);
             displayDates(currentDayNumber, currentMonthNumber, currentYearNumber);
         }
