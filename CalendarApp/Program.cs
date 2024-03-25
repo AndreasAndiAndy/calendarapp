@@ -282,7 +282,7 @@ namespace CalendarApp
             Console.WriteLine("-----------------------------");
 
             //TODO:
-            //Im Grunde muss nur der Monat und im Dezember das Jahr hochgezählt werden (oder runter, je nach Pfeil).
+            //Testen!
 
             if (direction.Equals(">")) {
                 
@@ -341,12 +341,38 @@ namespace CalendarApp
 
             }
 
-            //string daysInMonth = calendarFormInstance.numberOfDaysInThisMonthAndYear(month, year);
+            int daysInMonth = numberOfDaysInThisMonthAndYear(month, year);
 
             //displayDays(daysInMonth, "01", month, year);
             //displayDates("01", month, year);
 
         }
+
+        //Verstoß gegen das DRY-Prinzip ((
+        int numberOfDaysInThisMonthAndYear(string monthNumber, string year)
+        {
+
+            bool isLeapYear = DateTime.IsLeapYear(Int32.Parse(year));
+
+            int feb = isLeapYear ? 29 : 28;
+
+            IDictionary<int, int> monthsAntTheNumberOfTheirDays = new Dictionary<int, int>();
+            monthsAntTheNumberOfTheirDays.Add(1, 31);
+            monthsAntTheNumberOfTheirDays.Add(2, feb);
+            monthsAntTheNumberOfTheirDays.Add(3, 31);
+            monthsAntTheNumberOfTheirDays.Add(4, 30);
+            monthsAntTheNumberOfTheirDays.Add(5, 31);
+            monthsAntTheNumberOfTheirDays.Add(6, 30);
+            monthsAntTheNumberOfTheirDays.Add(7, 31);
+            monthsAntTheNumberOfTheirDays.Add(8, 31);
+            monthsAntTheNumberOfTheirDays.Add(9, 30);
+            monthsAntTheNumberOfTheirDays.Add(10, 31);
+            monthsAntTheNumberOfTheirDays.Add(11, 30);
+            monthsAntTheNumberOfTheirDays.Add(12, 31);
+
+            return monthsAntTheNumberOfTheirDays[Int32.Parse(monthNumber)];
+        }
+
 
 
 
