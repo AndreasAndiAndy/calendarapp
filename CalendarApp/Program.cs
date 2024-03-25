@@ -13,12 +13,10 @@ using System.Linq;
 //Was noch implementiert werden muss, ist die Logik zum Hin- und Hernavigieren im Kalender.  
 //Wenn navigiert wird, sollen keine Tagestermine dargestellt werden.
 
-
 namespace CalendarApp
 {
     public class CalendarForm : Form
     {
-
 
         private DateTime now = DateTime.Now;
         private string fieldDayNumber; private string fieldMonthNumber; private string fieldYearNumber;
@@ -195,8 +193,7 @@ namespace CalendarApp
         private void displayDays(int daysInMonth, string day, string month, string year)
         {
 
-         fieldDayNumber = day; fieldMonthNumber = month; fieldYearNumber = year;
-
+         
         // Zuerst alle vorherigen Labels entfernen
         List<Label> labelsToRemove = new List<Label>();
 
@@ -234,7 +231,7 @@ namespace CalendarApp
             left.Text = "<";
             left.Click += (sender, e) =>
              {
-                 Shift();
+                 Shift(year, month, day, "<");
              };
 
             Label right = new Label();
@@ -243,7 +240,7 @@ namespace CalendarApp
             right.Text = ">";
             right.Click += (sender, e) =>
             {
-                Shift();
+                Shift(year, month, day, ">");
             };
 
             for (int j = 0; j < 5; j++)
@@ -279,12 +276,48 @@ namespace CalendarApp
             Controls.Add(right);
         }
 
-        private void Shift()
+        
+        private void Shift(string year, string month, string day, string direction)
         {
-            throw new NotImplementedException();
+            //TODO:
+            //Im Grunde muss nur der Monat und im Dezember das Jahr hochgezählt werden (oder runter, je nach Pfeil).
+
+            if (direction.Equals("<")) {
+
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine(year);
+                Console.WriteLine(month);
+                Console.WriteLine(day);
+
+                // Datum mit dem gegebenen Monat und dem ersten Tag des Monats erstellen
+                DateTime dt = DateTime.ParseExact(month, "MM", CultureInfo.InvariantCulture);
+
+                // Den Monat um eins erhöhen
+                dt = dt.AddMonths(1);
+
+                // Den neuen Monat als String im Format "MM" erhalten
+                string nextMonth = dt.ToString("MM");
+
+
+            }
+            else if (direction.Equals(">")) {
+
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine(year);
+                Console.WriteLine(month);
+                Console.WriteLine(day);
+
+            }
+
+
+
+            //displayDays(daysInMonth, fieldDayNumber, fieldMonthNumber, fieldYearNumber);
+            //displayDates(fieldDayNumber, fieldMonthNumber, fieldYearNumber);
+
         }
 
-        //Es werden für den aktuell angezeiten Monat innerhalb des aktuell angezeigten Jahres die Termine an einem Tag angezeigt. 
+
+        //Es werden für den aktuell angezeigten Monat innerhalb des aktuell angezeigten Jahres die Termine an einem Tag angezeigt. 
         private void ShowAppointments(string day, string month, string year)
         {
             dataGridView.Rows.Clear();
