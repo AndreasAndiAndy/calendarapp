@@ -8,10 +8,7 @@ using System.Resources;
 using System.Collections.Generic;
 using System.Linq;
 
-
-//TODO:
-//Was noch implementiert werden muss, ist die Logik zum Hin- und Hernavigieren im Kalender.  
-//Wenn navigiert wird, sollen keine Tagestermine dargestellt werden.
+ 
 
 namespace CalendarApp
 {
@@ -279,11 +276,8 @@ namespace CalendarApp
         
         private void Shift(string year, string month, string direction)
         {
-            Console.WriteLine("-----------------------------");
-
-            //TODO:
-            //Testen!
-
+            
+            
             if (direction.Equals(">")) {
                 
                 // Datum mit dem gegebenen Monat und dem ersten Tag des Monats erstellen
@@ -343,8 +337,11 @@ namespace CalendarApp
 
             int daysInMonth = numberOfDaysInThisMonthAndYear(month, year);
 
-            //displayDays(daysInMonth, "01", month, year);
-            //displayDates("01", month, year);
+            //TODO:
+            //Testen!
+
+            displayDays(daysInMonth, "01", month, year);
+            displayDates("01", month, year);
 
         }
 
