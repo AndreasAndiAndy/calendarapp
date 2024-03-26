@@ -159,4 +159,22 @@
   <data name="My Event" xml:space="preserve">
     <value>Mein Ereignis</value>
   </data>
+  <data name="December" xml:space="preserve">
+    <value>Dezember</value>
+  </data>
+  <data name="February" xml:space="preserve">
+    <value>Februar</value>
+  </data>
+  <data name="January" xml:space="preserve">
+    <value>Januar</value>
+  </data>
+  <data name="July" xml:space="preserve">
+    <value>Juli</value>
+  </data>
+  <data name="November" xml:space="preserve">
+    <value>November</value>
+  </data>
+  <data name="October" xml:space="preserve">
+    <value>Oktober</value>
+  </data>
 </root>

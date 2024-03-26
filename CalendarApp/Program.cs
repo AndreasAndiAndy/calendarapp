@@ -289,9 +289,9 @@ namespace CalendarApp
                 // Den neuen Monat als String im Format "MM" erhalten
                 string nextMonth = dt.ToString("MM");
 
-                if (nextMonth.Equals("01")) {
+                month = nextMonth;
 
-                    month = nextMonth;
+                if (month.Equals("01")) {
 
                     DateTime date = new DateTime(int.Parse(year), 1, 1);
 
@@ -317,10 +317,10 @@ namespace CalendarApp
                 // Den neuen Monat als String im Format "MM" erhalten
                 string nextMonth = dt.ToString("MM");
 
-                if (nextMonth.Equals("12"))
-                {
+                month = nextMonth;
 
-                    month = nextMonth;
+                if (month.Equals("12"))
+                {
 
                     DateTime date = new DateTime(int.Parse(year), 1, 1);
 
@@ -338,7 +338,10 @@ namespace CalendarApp
             int daysInMonth = numberOfDaysInThisMonthAndYear(month, year);
 
             //TODO:
-            //Testen!
+            //Wenn ich im März weiternavigiere auf einen anderen Monat und ich dann wieder auf März zurücknavigiere,
+            //dann ist nicht der aktuelle Tag ausgewählt. Das kann man noch ändern.
+
+            Console.WriteLine(daysInMonth); Console.WriteLine(month); Console.WriteLine(year);
 
             displayDays(daysInMonth, "01", month, year);
             displayDates("01", month, year);
