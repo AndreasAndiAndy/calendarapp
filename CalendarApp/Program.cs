@@ -337,15 +337,35 @@ namespace CalendarApp
 
             int daysInMonth = numberOfDaysInThisMonthAndYear(month, year);
 
-            //TODO:
-            //Wenn ich im März weiternavigiere auf einen anderen Monat und ich dann wieder auf März zurücknavigiere,
-            //dann ist nicht der aktuelle Tag ausgewählt. Das kann man noch ändern.
+            //TODO: Es muss noch das Jahr ausgewählt werden können.
 
             Console.WriteLine(daysInMonth); Console.WriteLine(month); Console.WriteLine(year);
 
-            displayDays(daysInMonth, "01", month, year);
-            displayDates("01", month, year);
+            DateTime now = DateTime.Now;
+            string currentDay = now.ToString("dd");
 
+            string d = isCurrentMonth(month) ? currentDay : "01";
+
+            displayDays(daysInMonth, d, month, year);
+            displayDates(d, month, year);
+
+        }
+
+        private bool isCurrentMonth(string monthToCheck)
+        {
+
+            // Wandele den String in einen Integer um
+            int gesuchterMonat = Convert.ToInt32(monthToCheck);
+
+            // Erstelle ein DateTime-Objekt für den aktuellen Monat
+            DateTime jetzt = DateTime.Now;
+
+            // Überprüfe, ob die gegebene Zahl dem aktuellen Monat entspricht
+            if (gesuchterMonat == jetzt.Month)
+            {
+                return true;
+            }
+            return false;
         }
 
         //Verstoß gegen das DRY-Prinzip ((
