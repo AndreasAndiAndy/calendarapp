@@ -7,8 +7,7 @@ using System.Globalization;
 using System.Resources;
 using System.Collections.Generic;
 using System.Linq;
-
- 
+using System.Text.RegularExpressions;
 
 namespace CalendarApp
 {
@@ -21,7 +20,7 @@ namespace CalendarApp
         private DataGridView dataGridView;
 
         public CalendarForm()
-        {
+        { //TODO: Logik zum Löschen implementieren.
             
 
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
@@ -498,6 +497,8 @@ namespace CalendarApp
         //Es werden für den aktuell angezeigten Monat innerhalb des aktuell angezeigten Jahres die Termine an einem Tag angezeigt. 
         private void ShowAppointments(string day, string month, string year)
         {
+            day = Regex.Split(day, @"\s+")[0]; //Mich interessiert nur die Zahl. Schade, dass alles so hart koiert ist :\
+            
             dataGridView.Rows.Clear();
 
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
