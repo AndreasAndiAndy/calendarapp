@@ -15,7 +15,7 @@ namespace CalendarApp
     public class CalendarForm : Form
     {
 
-        private DateTime now = DateTime.Now; //TODO: Wie wäre es mit Wochentagen? 
+        private DateTime now = DateTime.Now;
 
         private string fieldDayNumber; private string fieldMonthNumber; private string fieldYearNumber;
         private DataGridView dataGridView;
@@ -276,7 +276,7 @@ namespace CalendarApp
                         label.BackColor = Color.LightGreen;
                         label.Size = new Size(50, 20);
                         label.Location = new Point(10 + i * 60, 70 + j * 75);
-                        label.Text = Day.ToString();
+                        label.Text = Day.ToString() + " " + rm.GetString(dayNameForDayMonthAndYear(Day.ToString(), month, year));
                         label.Click += (sender, e) =>
                         {
                             ShowAppointments(label.Text, month, year);
@@ -297,6 +297,22 @@ namespace CalendarApp
             Controls.Add(leftBig);
             Controls.Add(rightBig);
         }
+
+        private string dayNameForDayMonthAndYear(string dayString, string monthString, string yearString)
+        {
+
+                // Parse the month and year strings to integers
+                int day = int.Parse(dayString);
+                int month = int.Parse(monthString);
+                int year = int.Parse(yearString);
+
+                string dayName = new DateTime(year, month, day).DayOfWeek.ToString();
+
+                string dayNameShort = dayName.Substring(0, 3);
+
+            return dayNameShort;
+
+            }
 
         //////////////////////////////////////////////
 
