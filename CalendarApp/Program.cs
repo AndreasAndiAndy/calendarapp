@@ -15,7 +15,8 @@ namespace CalendarApp
     public class CalendarForm : Form
     {
 
-        private DateTime now = DateTime.Now;
+        private DateTime now = DateTime.Now; //TODO: Wie wäre es mit Wochentagen? 
+
         private string fieldDayNumber; private string fieldMonthNumber; private string fieldYearNumber;
         private DataGridView dataGridView;
 
@@ -299,13 +300,66 @@ namespace CalendarApp
 
         //////////////////////////////////////////////
 
-        private void ShiftBig(string year, string month, string v)
+        private void ShiftBig(string year, string month, string direction)
         {
-            Console.WriteLine("NotImplementedException()");
-        }
 
+
+            if (direction.Equals(">"))
+            {
+
+                // Datum mit dem gegebenen Monat und dem ersten Tag des Monats erstellen
+                DateTime dt = DateTime.ParseExact(year, "yyyy", CultureInfo.InvariantCulture);
+
+                // Den Monat um eins erhöhen
+                dt = dt.AddYears(1);
+
+                // Den neuen Monat als String im Format "MM" erhalten
+                string nextYear = dt.ToString("yyyy");
+
+                year = nextYear;
+
+
+            }
+            else if (direction.Equals("<"))
+            {
+
+                // Datum mit dem gegebenen Monat und dem ersten Tag des Monats erstellen
+                DateTime dt = DateTime.ParseExact(year, "yyyy", CultureInfo.InvariantCulture);
+
+                // Den Monat um eins erhöhen
+                dt = dt.AddYears(-1);
+
+                // Den neuen Monat als String im Format "MM" erhalten
+                string nextYear = dt.ToString("yyyy");
+
+                year = nextYear;
+                
+                DateTime date = new DateTime(int.Parse(year), 1, 1);
+
+                // Ein Jahr zum Datum hinzufügen
+                date = date.AddYears(-1);
+
+                // Datum in eine Zeichenfolge im gewünschten Format konvertieren
+                string incrementedYear = date.ToString("yyyy");
+
+                year = incrementedYear;
+                 
+
+            }
+
+            int daysInMonth = numberOfDaysInThisMonthAndYear(month, year);
+
+            DateTime now = DateTime.Now;
+            string currentDay = now.ToString("dd");
+
+            string d = isCurrentMonth(month) ? currentDay : "01";
+
+            displayDays(daysInMonth, d, month, year);
+            displayDates(d, month, year);
+
+        }
         //////////////////////////////////////////////
-        
+
 
         private void Shift(string year, string month, string direction)
         {
@@ -370,8 +424,6 @@ namespace CalendarApp
 
             int daysInMonth = numberOfDaysInThisMonthAndYear(month, year);
 
-            //TODO: Es muss noch das Jahr ausgewählt werden können.
-            
             DateTime now = DateTime.Now;
             string currentDay = now.ToString("dd");
 
