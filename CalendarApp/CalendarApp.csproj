@@ -65,6 +65,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppointmentForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Program.cs">
       <SubType>Form</SubType>
     </Compile>

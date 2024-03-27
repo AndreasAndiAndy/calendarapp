@@ -26,6 +26,7 @@ namespace CalendarApp
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
             var rm = new ResourceManager("CalendarApp.i18n.resources", typeof(CalendarForm).Assembly);
 
+
             int daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
             string currentDayNumber = now.Day.ToString();
             string currentMonthNumber = now.ToString("MM");
@@ -66,7 +67,7 @@ namespace CalendarApp
 
 
 
-        private void displayDates(string dayNumber, string monthNumber, string yearNumber)
+        public void displayDates(string dayNumber, string monthNumber, string yearNumber)
         {
             
             
@@ -187,7 +188,7 @@ namespace CalendarApp
         }
 
 
-        private void displayDays(int daysInMonth, string day, string month, string year)
+        public void displayDays(int daysInMonth, string day, string month, string year)
         {
 
          
@@ -223,7 +224,7 @@ namespace CalendarApp
             plus.Click += UpdateCalendar;
 
             Label left = new Label();
-            left.Size = new Size(50, 50);
+            left.Size = new Size(20, 20);
             left.Location = new Point(80, 20);
             left.Text = "<";
             left.Click += (sender, e) =>
@@ -232,13 +233,34 @@ namespace CalendarApp
              };
 
             Label right = new Label();
-            right.Size = new Size(50, 50);
+            right.Size = new Size(20, 20);
             right.Location = new Point(150, 20);
             right.Text = ">";
             right.Click += (sender, e) =>
             {
                 Shift(year, month, ">");
             };
+            
+
+            Label leftBig = new Label();
+            leftBig.Size = new Size(20, 20);
+            leftBig.Location = new Point(57, 20);
+            leftBig.Text = "<";
+            leftBig.Click += (sender, e) =>
+            {
+                ShiftBig(year, month, "<");
+            };
+
+            Label rightBig = new Label();
+            rightBig.Size = new Size(20, 20);
+            rightBig.Location = new Point(173, 20);
+            rightBig.Text = ">";
+            rightBig.Click += (sender, e) =>
+            {
+                ShiftBig(year, month, ">");
+            };
+
+           
 
             for (int j = 0; j < 5; j++)
             {
@@ -271,9 +293,20 @@ namespace CalendarApp
             Controls.Add(plus);
             Controls.Add(left);
             Controls.Add(right);
+            Controls.Add(leftBig);
+            Controls.Add(rightBig);
         }
 
+        //////////////////////////////////////////////
+
+        private void ShiftBig(string year, string month, string v)
+        {
+            Console.WriteLine("NotImplementedException()");
+        }
+
+        //////////////////////////////////////////////
         
+
         private void Shift(string year, string month, string direction)
         {
             
@@ -338,9 +371,7 @@ namespace CalendarApp
             int daysInMonth = numberOfDaysInThisMonthAndYear(month, year);
 
             //TODO: Es muss noch das Jahr ausgewählt werden können.
-
-            Console.WriteLine(daysInMonth); Console.WriteLine(month); Console.WriteLine(year);
-
+            
             DateTime now = DateTime.Now;
             string currentDay = now.ToString("dd");
 
@@ -539,6 +570,8 @@ namespace CalendarApp
             return months[int.Parse(currentMonth) - 1];
         }
 
+
+        /*
         public class AppointmentForm : Form
         {
             private CalendarForm calendarFormInstance;
@@ -788,6 +821,7 @@ namespace CalendarApp
 
 
         }
+        */
 
         [STAThread]
         static void Main()
